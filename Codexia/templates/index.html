@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codexia - Apprendre Python</title>
+    <style>
+        /* Base de la page */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9; /* Blanc un peu cassé pour moins fatiguer les yeux */
+            color: #333;
+        }
+
+        /* La Bannière Codexia demandée */
+        .banner {
+            background-color: #6a0dad; /* Violet profond */
+            color: #ffffff; /* Texte blanc */
+            padding: 3rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .banner h1 {
+            margin: 0;
+            font-size: 3.5rem;
+            letter-spacing: 2px;
+        }
+
+        .banner p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        /* Le conteneur principal */
+        .container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .btn-commencer {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 25px;
+            background-color: #6a0dad;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-commencer:hover {
+            background-color: #550a8b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="banner">
+        <h1>CODEXIA</h1>
+        <p>L'arène d'entraînement pour maîtriser Python</p>
+    </div>
+
+    <div class="container">
+        
+        {% if user %}
+            <div style="background: #eef; padding: 20px; border-radius: 8px; margin-bottom: 30px; text-align: left; border-left: 5px solid #6a0dad;">
+                <h2 style="margin-top: 0;">Bienvenue, {{ user.username }} !</h2>
+                <p><strong>Rang actuel :</strong> {{ user.titre_rang }} <span style="color: #6a0dad;">(Niveau {{ user.niveau_actuel }})</span></p>
+                <p><strong>Expérience :</strong> 💎 {{ user.xp }} XP</p>
+                
+                <div style="width: 100%; background-color: #ddd; border-radius: 5px; height: 20px; margin-top: 10px;">
+                    <div style="height: 20px; border-radius: 5px; background-color: #6a0dad; width: {{ (user.xp / 4200) * 100 }}%; max-width: 100%;"></div>
+                </div>
+                
+                <div style="margin-top: 15px; text-align: right;">
+                    <a href="/deconnexion" style="color: red; text-decoration: none; font-size: 0.9em;">Se déconnecter</a>
+                </div>
+            </div>
+        {% else %}
+            <div style="margin-bottom: 30px;">
+                <p>Connecte-toi pour sauvegarder ta progression et gagner de l'XP !</p>
+                <a href="/connexion" class="btn-commencer">Se connecter</a>
+                <a href="/inscription" class="btn-commencer" style="background: #333;">S'inscrire</a>
+            </div>
+        {% endif %}
+
+        <h2>Catalogue des Exercices</h2>
+        
+        {% if exercices %}
+            <ul style="list-style-type: none; padding: 0;">
+            {% for exo in exercices %}
+                
+                {% set est_bloque = false %}
+                {% if user and exo.niveau_requis_num > user.niveau_actuel %}
+                    {% set est_bloque = true %}
+                {% elif not user %}
+                    {% set est_bloque = true %}
+                {% endif %}
+
+                {% if est_bloque %}
+                    <li style="background: #e0e0e0; margin: 10px 0; padding: 15px; border-radius: 5px; border-left: 5px solid #999; text-align: left; opacity: 0.6; cursor: not-allowed;">
+                        <strong>🔒 {{ exo.title }}</strong> 
+                        <span style="color: #666; font-size: 0.9em;">- {{ exo.theme_chapitre }}</span>
+                        <br>
+                        <small style="color: #555; font-weight: bold;">Niveau : {{ exo.grade_exercice }} | 💎 {{ exo.xp_reward }} XP (Requis : {{ exo.grade_exercice }})</small>
+                    </li>
+                {% else %}
+                    <a href="/exercice/{{ exo.chemin_url }}" style="text-decoration: none; color: inherit; display: block;">
+                        <li style="background: #f9f9f9; margin: 10px 0; padding: 15px; border-radius: 5px; border-left: 5px solid #6a0dad; text-align: left; transition: 0.2s;">
+                            <strong>✅ {{ exo.title }}</strong> 
+                            <span style="color: #666; font-size: 0.9em;">- {{ exo.theme_chapitre }}</span>
+                            <br>
+                            <small style="color: #6a0dad; font-weight: bold;">Niveau : {{ exo.grade_exercice }} | 💎 {{ exo.xp_reward }} XP</small>
+                        </li>
+                    </a>
+                {% endif %}
+
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>Aucun exercice trouvé dans la base de données.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

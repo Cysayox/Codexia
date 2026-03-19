@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><title>Connexion - Codexia</title></head>
+<body style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+    <h2>Se connecter à Codexia</h2>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}<p style="color: red;">{{ messages[0] }}</p>{% endif %}
+    {% endwith %}
+    <form method="POST">
+        <input type="email" name="email" placeholder="Email" required><br><br>
+        <input type="password" name="password" placeholder="Mot de passe" required><br><br>
+        <button type="submit" style="background: #6a0dad; color: white; padding: 10px;">Connexion</button>
+    </form>
+    <p><a href="/inscription">Pas encore de compte ? Créer un compte</a></p>
+</body>
+</html>

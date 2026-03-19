@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Codexia - {{ exercice.title }}</title>
+    <style>
+        /* Mise en page globale (Flexbox) */
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f4f9; display: flex; height: 100vh; flex-direction: column;}
+        
+        /* En-tête */
+        .header { background: #6a0dad; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center;}
+        .header a { color: white; text-decoration: none; font-weight: bold; }
+        
+        /* Contenu principal divisé en deux */
+        .main-content { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Colonne de gauche : Consignes */
+        .instructions { width: 40%; padding: 2rem; background: white; overflow-y: auto; border-right: 2px solid #ddd; }
+        
+        /* Colonne de droite : Code et Console */
+        .workspace { width: 60%; display: flex; flex-direction: column; }
+        #editor-container { flex: 1; width: 100%; } /* L'éditeur prendra tout l'espace du haut */
+        
+        /* Barre d'actions et bouton */
+        .actions { padding: 10px; background: #2d2d2d; text-align: right; }
+        .btn-submit { background: #10a37f; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 16px;}
+        .btn-submit:hover { background: #0d8a6a; }
+        
+        /* La console en bas à droite */
+        .console-panel { height: 200px; background: #1e1e1e; color: #00ff00; padding: 1rem; overflow-y: auto; font-family: monospace; border-top: 5px solid #333;}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div><strong>Codexia</strong> | {{ exercice.title }} ({{ exercice.grade_exercice }})</div>
+        <a href="/">← Retour au menu</a>
+    </div>
+    
+    <div class="main-content">
+        <div class="instructions">
+            <h2>Consignes</h2>
+            <p>{{ exercice.instructions | default('Écris ton code en Python pour résoudre ce problème.', true) }}</p>
+            <hr>
+            <p><strong>💎 Récompense :</strong> {{ exercice.xp_reward }} XP</p>
+        </div>
+        
+        <div class="workspace">
+            <div id="editor-container"></div>
+            
+            <div class="actions">
+                <button class="btn-submit" id="btn-valider">Valider mon code</button>
+            </div>
+            
+            <div class="console-panel">
+                <div id="console-output">> Terminal prêt. En attente de soumission...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
+    <script>
+        // On récupère le code de base de l'exercice depuis la BDD pour le mettre dans l'éditeur
+        const codeDeBase = `{{ exercice.base_code | default('def ma_fonction():\n    # Ton code ici\n    pass', true) }}`;
+
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            window.monacoEditor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: codeDeBase,
+                language: 'python',
+                theme: 'vs-dark',       // Thème sombre pro
+                automaticLayout: true,  // S'adapte à la taille de l'écran
+                fontSize: 16,
+                minimap: { enabled: false } // On désactive la minimap pour gagner de la place
+            });
+        });
+
+        // Ce qui se passe quand on clique sur "Valider"
+        // Ce qui se passe quand on clique sur "Valider"
+        document.getElementById('btn-valider').addEventListener('click', async function() {
+            const btn = document.getElementById('btn-valider');
+            const consoleOutput = document.getElementById('console-output');
+            
+            // 1. On capture le code écrit par l'utilisateur
+            const codeUtilisateur = window.monacoEditor.getValue();
+            
+            // 2. On change l'état du bouton et de la console pendant l'attente
+            btn.innerText = "Exécution en cours...";
+            btn.disabled = true;
+            consoleOutput.style.color = "#aaaaaa"; // Gris
+            consoleOutput.innerText = "> Envoi au moteur Codexia...\n> Analyse en cours...";
+            
+            try {
+                // 3. On envoie la requête HTTP POST à notre nouvelle route Flask
+                const response = await fetch('/api/soumettre', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: codeUtilisateur,
+                        id_exercice: {{ exercice.id_exercice }} // Jinja injecte l'ID dynamique ici
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // 4. On affiche le résultat dans la console
+                if (data.status === 'success') {
+                    consoleOutput.style.color = '#00ff00'; // Vert hacker
+                    consoleOutput.innerText = "> SUCCÈS !\n> " + data.output;
+                    btn.innerText = "Exercice Validé !";
+                    btn.style.background = "#10a37f";
+                } else {
+                    consoleOutput.style.color = '#ff4444'; // Rouge erreur
+                    consoleOutput.innerText = "> ÉCHEC DE L'EXÉCUTION :\n\n" + data.output;
+                    btn.innerText = "Réessayer";
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                consoleOutput.style.color = '#ff4444';
+                consoleOutput.innerText = "> Erreur critique : Impossible de joindre le serveur Flask.";
+                btn.innerText = "Valider mon code";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
