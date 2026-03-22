@@ -1,2 +1,7 @@
 # Codexia
-Exercism like project
+
+## A faire:
+-Parcours Javascript
+-Parcours SQL
+-Classement général
+-Page explication systeme niveau
