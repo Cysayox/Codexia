@@ -1,11 +1,21 @@
+import os
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from db import get_db_connection
 from moteur_codexia import evaluer_code
+import mysql.connector
 
 app = Flask(__name__)
 # VITAL : Clé secrète pour crypter les cookies de session (à ne jamais partager en production)
 app.secret_key = 'une_cle_secrete_tres_complexe_pour_codexia'
+
+# --- CONFIGURATION POUR LES AVATARS ---
+app.config['UPLOAD_FOLDER'] = 'static/uploads/avatars'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # --- LOGIQUE DE GAMIFICATION ---
 def calculer_rang(xp):
@@ -31,7 +41,7 @@ def accueil():
     
     user_info = None
     if 'user_id' in session:
-        cursor.execute("SELECT username, global_xp, role FROM utilisateur WHERE id_utilisateur = %s", (session['user_id'],))
+        cursor.execute("SELECT username, global_xp, role, avatar_url FROM utilisateur WHERE id_utilisateur = %s", (session['user_id'],))
         db_user = cursor.fetchone()
         if db_user:
             rang = calculer_rang(db_user['global_xp'])
@@ -40,7 +50,8 @@ def accueil():
                 "xp": db_user['global_xp'],
                 "titre_rang": rang["titre"],
                 "niveau_actuel": rang["niveau"],
-                "role": db_user['role']
+                "role": db_user['role'],
+                "avatar_url": db_user['avatar_url']
             }
 
     # On récupère tous les parcours depuis la table 'track' (Python, etc.)
@@ -80,7 +91,7 @@ def parcours(slug):
     user_progress = {}
 
     if 'user_id' in session:
-        cursor.execute("SELECT username, global_xp, role FROM utilisateur WHERE id_utilisateur = %s", (session['user_id'],))
+        cursor.execute("SELECT username, global_xp, role, avatar_url FROM utilisateur WHERE id_utilisateur = %s", (session['user_id'],))
         db_user = cursor.fetchone()
         if db_user:
             rang = calculer_rang(db_user['global_xp'])
@@ -89,7 +100,8 @@ def parcours(slug):
                 "xp": db_user['global_xp'],
                 "titre_rang": rang["titre"],
                 "niveau_actuel": rang["niveau"],
-                "role": db_user['role']
+                "role": db_user['role'],
+                "avatar_url": db_user['avatar_url']
             }
             
             cursor.execute("SELECT id_exercice, status_progression FROM progresser WHERE id_utilisateur = %s", (session['user_id'],))
@@ -215,8 +227,6 @@ def soumettre_code():
     # ON UTILISE LE VRAI ID DE LA SESSION
     id_utilisateur = session['user_id'] 
 
-    # ... (le reste de ton code ne change pas) ...
-
     if not code_utilisateur or not id_exercice:
         return jsonify({"status": "failed", "output": "Données manquantes."}), 400
 
@@ -239,12 +249,12 @@ def soumettre_code():
     db_status = 'success' if resultat['status'] == 'success' else 'failed'
     cursor.execute(
         "INSERT INTO soumission (id_utilisateur, id_exercice, code, status_soumission, test_output) VALUES (%s, %s, %s, %s, %s)",
-        (id_utilisateur, id_exercice, code_utilisateur, db_status, resultat['output'][:1000]) # On coupe l'output à 1000 caractères au cas où l'erreur est gigantesque
+        (id_utilisateur, id_exercice, code_utilisateur, db_status, resultat['output'][:1000]) # On coupe l'output à 1000 caractères
     )
 
     # 4. Si c'est un succès, on gère la progression et l'XP
     if resultat['status'] == 'success':
-        # On vérifie si l'utilisateur n'avait pas DÉJÀ réussi cet exercice avant (pour ne pas lui donner l'XP à l'infini)
+        # On vérifie si l'utilisateur n'avait pas DÉJÀ réussi cet exercice avant
         cursor.execute("SELECT * FROM progresser WHERE id_utilisateur = %s AND id_exercice = %s AND status_progression = 'termine'", (id_utilisateur, id_exercice))
         deja_reussi = cursor.fetchone()
 
@@ -280,8 +290,8 @@ def profil():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # 1. On récupère les infos globales de l'utilisateur
-    cursor.execute("SELECT username, email, global_xp, created_at FROM utilisateur WHERE id_utilisateur = %s", (session['user_id'],))
+    # 1. On récupère les infos globales de l'utilisateur (AVEC l'avatar_url)
+    cursor.execute("SELECT username, email, global_xp, created_at, avatar_url FROM utilisateur WHERE id_utilisateur = %s", (session['user_id'],))
     user_db = cursor.fetchone()
 
     # On utilise ta fonction de gamification pour calculer le rang actuel
@@ -292,11 +302,11 @@ def profil():
         "xp": user_db['global_xp'],
         "titre_rang": rang_info["titre"],
         "niveau_actuel": rang_info["niveau"],
-        "date_inscription": user_db['created_at'].strftime("%d/%m/%Y") if user_db['created_at'] else "Inconnue"
+        "date_inscription": user_db['created_at'].strftime("%d/%m/%Y") if user_db['created_at'] else "Inconnue",
+        "avatar_url": user_db['avatar_url']
     }
 
     # 2. On récupère l'historique des exercices TERMINÉS
-    # On fait une jointure (JOIN) entre 'progresser' et 'exercice' pour avoir le titre de l'exercice
     query_historique = """
         SELECT e.title, e.chemin_url, e.xp_reward, p.completed_at
         FROM progresser p
@@ -311,6 +321,121 @@ def profil():
     conn.close()
 
     return render_template('profil.html', user=user_info, historique=exercices_termines)
+
+# ==========================================
+# GESTION DU PROFIL (Modifier complet)
+# ==========================================
+@app.route('/profil/modifier', methods=['GET', 'POST'])
+def modifier_profil():
+    if 'user_id' not in session:
+        return redirect(url_for('connexion'))
+        
+    user_id = session['user_id']
+    
+    if request.method == 'POST':
+        nouveau_pseudo = request.form.get('username')
+        nouvel_email = request.form.get('email')
+        
+        # Récupération des mots de passe
+        mdp_actuel = request.form.get('current_password')
+        nouveau_mdp = request.form.get('new_password')
+        confirm_mdp = request.form.get('confirm_password')
+        
+        # Récupération de l'image
+        avatar = request.files.get('avatar')
+        
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(dictionary=True) 
+            
+            # 1. On récupère le joueur pour vérifier son mot de passe actuel
+            cursor.execute('SELECT * FROM utilisateur WHERE id_utilisateur = %s', (user_id,))
+            user_actuel = cursor.fetchone()
+            
+            # 2. Mise à jour des informations de base (Pseudo et Email)
+            cursor.execute('''
+                UPDATE utilisateur 
+                SET username = %s, email = %s 
+                WHERE id_utilisateur = %s
+            ''', (nouveau_pseudo, nouvel_email, user_id))
+            
+            # 3. Traitement du Mot de passe (S'il a rempli le champ "Mot de passe actuel")
+            if mdp_actuel:
+                if check_password_hash(user_actuel['password_hash'], mdp_actuel):
+                    if nouveau_mdp and nouveau_mdp == confirm_mdp:
+                        nouveau_hash = generate_password_hash(nouveau_mdp)
+                        cursor.execute('UPDATE utilisateur SET password_hash = %s WHERE id_utilisateur = %s', (nouveau_hash, user_id))
+                    else:
+                        flash("Les nouveaux mots de passe ne correspondent pas.", "error")
+                        return redirect(url_for('modifier_profil'))
+                else:
+                    flash("Ton mot de passe actuel est incorrect.", "error")
+                    return redirect(url_for('modifier_profil'))
+            
+            # 4. Traitement de l'Avatar
+            if avatar and avatar.filename != '' and allowed_file(avatar.filename):
+                # On crée le dossier s'il n'existe pas encore
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                
+                # On sécurise le nom du fichier et on ajoute l'ID du joueur pour éviter les doublons
+                filename = secure_filename(f"user_{user_id}_{avatar.filename}")
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                avatar.save(filepath)
+                
+                # On sauvegarde le chemin relatif dans la base de données
+                db_filepath = f"uploads/avatars/{filename}"
+                cursor.execute('UPDATE utilisateur SET avatar_url = %s WHERE id_utilisateur = %s', (db_filepath, user_id))
+
+            conn.commit()
+            cursor.close() 
+            conn.close()   
+            
+            session['username'] = nouveau_pseudo
+            flash("Profil mis à jour avec succès !", "success")
+            return redirect(url_for('profil'))
+            
+        except mysql.connector.IntegrityError: 
+            flash("Ce pseudo ou cet e-mail est déjà utilisé par un autre joueur.", "error")
+            return redirect(url_for('modifier_profil'))
+
+    # GET : Affichage du formulaire
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True) 
+    cursor.execute('SELECT * FROM utilisateur WHERE id_utilisateur = %s', (user_id,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    return render_template('modifier_profil.html', user=user)
+
+# ==========================================
+# GESTION DU PROFIL (Supprimer)
+# ==========================================
+@app.route('/profil/supprimer', methods=['POST'])
+def supprimer_profil():
+    if 'user_id' not in session:
+        return redirect(url_for('connexion'))
+        
+    user_id = session['user_id']
+    username_actuel = session['username']
+    username_saisi = request.form.get('confirm_username')
+    
+    if username_saisi == username_actuel:
+        conn = get_db_connection()
+        cursor = conn.cursor() 
+        
+        # Grâce au ON DELETE CASCADE de ta base, tout le reste disparaît avec lui !
+        cursor.execute('DELETE FROM utilisateur WHERE id_utilisateur = %s', (user_id,))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        session.clear()
+        return redirect(url_for('accueil'))
+    else:
+        flash("Le pseudo saisi ne correspond pas. Suppression annulée.", "error")
+        return redirect(url_for('profil'))
 
 # --- LANCEMENT DU SERVEUR ---
 if __name__ == '__main__':

@@ -35,6 +35,28 @@
                 Progression vers le rang Maître
             </div>
         </div>
+
+        <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
+            <a href="/profil/modifier" style="flex: 1; text-align: center; background: #f4f4f9; color: #310652; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; border: 1px solid #dcdce6; transition: 0.3s;">
+                ✏️ Modifier le profil
+            </a>
+            
+            <button onclick="document.getElementById('delete-zone').style.display='block'" style="flex: 1; background: white; color: #e74c3c; border: 1px solid #e74c3c; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                🗑️ Supprimer le compte
+            </button>
+        </div>
+
+        <div id="delete-zone" style="display: none; margin-top: 20px; padding: 20px; border: 1px solid #e74c3c; border-radius: 8px; background: #fff5f5;">
+            <h4 style="color: #e74c3c; margin: 0 0 10px 0;">⚠️ Zone de danger</h4>
+            <p style="font-size: 0.9rem; color: #555; margin-bottom: 15px;">Cette action est irréversible. Toutes tes données et ton XP seront perdus. Pour confirmer, tape <strong>{{ user.username }}</strong> ci-dessous :</p>
+            
+            <form action="/profil/supprimer" method="POST" style="display: flex; gap: 10px;">
+                <input type="text" name="confirm_username" required placeholder="Tape ton pseudo..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                    Confirmer la suppression
+                </button>
+            </form>
+        </div>
     </aside>
 
     <main class="profil-details">

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier le profil - Codexia{% endblock %}
+
+{% block content %}
+<div class="section-container" style="max-width: 600px; margin: 40px auto;">
+    
+    <a href="/profil" style="display: inline-block; margin-bottom: 20px; color: #6a0dad; text-decoration: none; font-weight: bold;">
+        ← Retour au profil
+    </a>
+
+    <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef;">
+        <h2 style="color: #310652; margin-top: 0; margin-bottom: 30px; text-align: center;">Modifier tes informations</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 15px; border-radius: 6px; margin-bottom: 20px; text-align: center; 
+                                {% if category == 'error' %}background: #fff0f0; color: #e74c3c; border: 1px solid #e74c3c;
+                                {% else %}background: #f0fdf9; color: #10a37f; border: 1px solid #10a37f;{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/profil/modifier" enctype="multipart/form-data">
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 10px; color: #333;">Photo de profil</label>
+                
+                <img src="{% if user.avatar_url %}{{ url_for('static', filename=user.avatar_url) }}{% else %}{{ url_for('static', filename='images/profil.svg') }}{% endif %}" 
+                     alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #6a0dad; margin-bottom: 15px; background: #f4f4f9;">
+                
+                <input type="file" name="avatar" accept="image/png, image/jpeg, image/gif" style="display: block; margin: 0 auto; font-size: 0.9rem;">
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Pseudo</label>
+                <input type="text" name="username" value="{{ user.username }}" required 
+                       style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Adresse E-mail</label>
+                <input type="email" name="email" value="{{ user.email }}" required 
+                       style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+            <h3 style="color: #310652; margin-top: 0; margin-bottom: 5px;">Changer de mot de passe</h3>
+            <p style="font-size: 0.85rem; color: #888; margin-bottom: 20px;">(Laisse vide si tu ne souhaites pas le modifier)</p>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Mot de passe actuel</label>
+                <input type="password" name="current_password" placeholder="Requis uniquement pour changer de mot de passe"
+                       style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 6px;">
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-bottom: 30px;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Nouveau mot de passe</label>
+                    <input type="password" name="new_password" 
+                           style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 6px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Confirmer le nouveau</label>
+                    <input type="password" name="confirm_password" 
+                           style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 6px;">
+                </div>
+            </div>
+
+            <button type="submit" style="width: 100%; background: #6a0dad; color: white; border: none; padding: 15px; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                💾 Sauvegarder les modifications
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
