@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Parcours {{ track_name }} - Codexia{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/parcours.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="banner">
+    <h1>CODEXIA</h1>
+    <p>L'arène d'entraînement pour maîtriser le code</p>
+</div>
+
+{% if session.get('user_id') %}
+    <div class="dashboard-container" style="margin-top: -30px; position: relative; z-index: 10;">
+        <div style="background: white; padding: 20px 25px; border-radius: 8px; border-left: 6px solid {% if user.role == 'admin' %}#e74c3c{% else %}#6a0dad{% endif %}; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
+            {% if user.role == 'admin' %}
+                <div>
+                    <h2 style="margin: 0 0 5px 0; font-size: 1.3rem; color: #e74c3c;">Mode Administrateur 👑</h2>
+                    <p style="margin: 0; color: #666; font-size: 0.95rem;">Bienvenue {{ user.username }}. Les restrictions de niveaux sont désactivées pour toi.</p>
+                </div>
+                <div style="text-align: right;"><span style="font-size: 1.1rem; font-weight: bold; color: #e74c3c;">Staff Codexia</span></div>
+            {% else %}
+                <div>
+                    <h2 style="margin: 0 0 5px 0; font-size: 1.3rem;">Bon retour, {{ user.username }} !</h2>
+                    <p style="margin: 0; color: #666; font-size: 0.95rem;">Prêt pour ton prochain défi ?</p>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 1.1rem; font-weight: bold; color: #310652;">{{ user.titre_rang }}</span><br>
+                    <span style="color: #6a0dad; font-weight: bold; font-size: 0.95rem;">💎 {{ user.xp }} XP</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+<div class="dashboard-container" id="exercices">
+    <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">Parcours {{ track_name }}</h2>
+    
+    <div class="layout-main-sidebar">
+        <div class="main-content-grid">
+            {% if exercices %}
+                <div class="challenges-grid">
+                    {% for exo in exercices %}
+                        
+                        {% set niveau_class = 'debutant' %}
+                        {% if exo.grade_exercice == 'Intermédiaire' %} {% set niveau_class = 'intermediaire' %}
+                        {% elif exo.grade_exercice == 'Avancé' %} {% set niveau_class = 'avance' %}
+                        {% elif exo.grade_exercice == 'Expert' %} {% set niveau_class = 'expert' %}
+                        {% elif exo.grade_exercice == 'Maître' %} {% set niveau_class = 'maitre' %}
+                        {% endif %}
+
+                        {% set link_url = '#' %}
+                        {% if not session.get('user_id') %}
+                            {% set link_url = '/connexion' %}
+                        {% elif exo.statut_visuel != 'locked' %}
+                            {% set link_url = '/exercice/' ~ exo.chemin_url %}
+                        {% endif %}
+
+                        <a href="{{ link_url }}" class="challenge-card niveau-{{ niveau_class }} {% if exo.statut_visuel == 'locked' and session.get('user_id') %}locked{% endif %}">
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <h3 style="margin: 0; font-size: 1.05rem; color: #333; line-height: 1.2;">
+                                    {% if not session.get('user_id') %}🎯
+                                    {% elif exo.statut_visuel == 'locked' %}🔒
+                                    {% elif exo.statut_visuel == 'completed' %}✅
+                                    {% else %}🎯{% endif %} 
+                                    {{ exo.title }}
+                                </h3>
+                                <span style="font-weight: bold; color: #6a0dad; font-size: 0.85rem; white-space: nowrap; margin-left: 8px;">
+                                    💎 +{{ exo.xp_reward }}
+                                </span>
+                            </div>
+                            
+                            <p class="challenge-desc">
+                                {{ exo.description | default("Résous ce défi pour gagner de l'XP.", true) }}
+                            </p>
+                            
+                            <div class="tags-container">
+                                <span class="tag tag-{{ niveau_class }}">{{ exo.grade_exercice }}</span>
+                                <span class="tag tag-theme">{{ exo.theme_chapitre }}</span>
+                                
+                                {% if exo.statut_visuel == 'completed' %}
+                                    <span class="tag" style="background: #e6f6f2; color: #10a37f; border: 1px solid #10a37f;">Terminé</span>
+                                {% elif exo.statut_visuel == 'locked' and session.get('user_id') %}
+                                    <span class="tag" style="background: #eee; color: #888;">Verrouillé</span>
+                                {% endif %}
+                            </div>
+                            
+                        </a>
+
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Aucun défi disponible.</p>
+            {% endif %}
+        </div>
+
+        <aside class="progress-sidebar">
+            <h3>Progression Globale</h3>
+            <div class="nodes-container">
+                {% for exo in exercices %}
+                    <a href="{% if not session.get('user_id') %}/connexion{% elif exo.statut_visuel != 'locked' %}/exercice/{{ exo.chemin_url }}{% else %}#{% endif %}" style="text-decoration: none;">
+                        <div class="node node-{% if not session.get('user_id') %}available{% else %}{{ exo.statut_visuel }}{% endif %}" title="{{ exo.title }}">
+                            {% if exo.statut_visuel == 'completed' %}✓{% endif %}
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+
+            <div class="progress-legend">
+                <div class="legend-item"><div class="legend-circle node-completed"></div> <span>Terminé</span></div>
+                <div class="legend-item"><div class="legend-circle node-in_progress"></div> <span>En cours</span></div>
+                <div class="legend-item"><div class="legend-circle node-available"></div> <span>Disponible</span></div>
+                <div class="legend-item"><div class="legend-circle node-locked"></div> <span>Niveau requis insuffisant</span></div>
+            </div>
+        </aside>
+
+    </div>
+</div>
+{% endblock %}

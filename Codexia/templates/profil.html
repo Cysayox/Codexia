@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Mon Profil - Codexia{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profil.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="banner">
+    <h1>MON PROFIL</h1>
+    <p>La vitrine de tes exploits dans l'Arène</p>
+</div>
+
+<div class="profil-layout">
+    
+    <aside class="profil-card">
+        <div class="profil-avatar">
+            <img src="{{ url_for('static', filename='images/profil.svg') }}" alt="Avatar du joueur">
+        </div>
+        
+        <h2 class="profil-username">{{ user.username }}</h2>
+        <div class="profil-rank">👑 {{ user.titre_rang }}</div>
+        <div class="profil-date">Membre depuis le {{ user.date_inscription }}</div>
+        
+        <div class="xp-container">
+            <div class="xp-header">
+                <span>Expérience Totale</span>
+                <span style="color: #10a37f;">💎 {{ user.xp }} XP</span>
+            </div>
+            <div class="xp-bar-bg">
+                <div class="xp-bar-fill" style="width: {{ (user.xp / 4200) * 100 }}%; max-width: 100%;"></div>
+            </div>
+            <div style="text-align: center; font-size: 0.8rem; color: #888; margin-top: 8px;">
+                Progression vers le rang Maître
+            </div>
+        </div>
+    </aside>
+
+    <main class="profil-details">
+        
+        <section class="details-section">
+            <h3>Titres & Hauts Faits</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-top: 0;">Débloque des titres exclusifs en prouvant ta valeur.</p>
+            <div class="badges-grid">
+                <div class="badge-locked" style="border-color: #10a37f; color: #10a37f; background: #e6f6f2;">🎖️ Amateur du code</div>
+                <div class="badge-locked">🔒 Pro de la Programmation</div>
+                <div class="badge-locked">🔒 Maître en Python</div>
+                <div class="badge-locked">🔒 Maître absolu du code</div>
+            </div>
+        </section>
+
+        <section class="details-section">
+            <h3>Progression par Parcours</h3>
+            
+            <div class="track-progress">
+                <div class="track-header">
+                    <div class="track-title-container">
+                        <img src="{{ url_for('static', filename='images/python.svg') }}" alt="Python Logo" class="track-icon-mini">
+                        <span>Python</span>
+                    </div>
+                    <span style="color: #10a37f;">{{ ((user.xp / 4200) * 100)|round(1) }}%</span>
+                </div>
+                <div class="xp-bar-bg">
+                    <div class="xp-bar-fill track-python" style="width: {{ (user.xp / 4200) * 100 }}%;"></div>
+                </div>
+            </div>
+
+            <div class="track-progress">
+                <div class="track-header">
+                    <div class="track-title-container">
+                        <img src="{{ url_for('static', filename='images/javascript.svg') }}" alt="JavaScript Logo" class="track-icon-mini">
+                        <span>JavaScript</span>
+                    </div>
+                    <span style="color: #aaa;">0% (À venir)</span>
+                </div>
+                <div class="xp-bar-bg" style="background-color: #eee;">
+                    <div class="xp-bar-fill track-js" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="track-progress">
+                <div class="track-header">
+                    <div class="track-title-container">
+                        <img src="{{ url_for('static', filename='images/sql.svg') }}" alt="SQL Logo" class="track-icon-mini">
+                        <span>SQL</span>
+                    </div>
+                    <span style="color: #aaa;">0% (À venir)</span>
+                </div>
+                <div class="xp-bar-bg" style="background-color: #eee;">
+                    <div class="xp-bar-fill track-sql" style="width: 0%;"></div>
+                </div>
+            </div>
+            
+        </section>
+
+        <section class="details-section">
+            <h3>Derniers Exercices Résolus ({{ historique|length }})</h3>
+            
+            {% if historique %}
+                <ul class="history-list">
+                    {% for exo in historique %}
+                        <li class="history-item">
+                            <div class="history-info">
+                                <strong>✅ {{ exo.title }}</strong>
+                                <span class="history-date">Validé le {{ exo.completed_at.strftime('%d/%m/%Y à %H:%M') }}</span>
+                            </div>
+                            <div class="history-action">
+                                <span class="history-xp">+{{ exo.xp_reward }} XP</span>
+                                <a href="/exercice/{{ exo.chemin_url }}" class="btn-revoir">Revoir le code</a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div style="text-align: center; padding: 20px;">
+                    <p style="color: #666; font-style: italic;">Tu n'as pas encore validé d'exercices.</p>
+                    <a href="/" class="btn-revoir" style="display: inline-block; margin-top: 10px; background: #6a0dad; color: white;">Retourner à l'entraînement</a>
+                </div>
+            {% endif %}
+        </section>
+
+    </main>
+
+</div>
+{% endblock %}

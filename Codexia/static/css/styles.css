@@ -1,0 +1,133 @@
+/* --- static/css/styles.css --- */
+
+/* CSS GLOBAL */
+body { 
+    margin: 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background-color: #f4f4f9; 
+    color: #333; 
+    
+    /* ASTUCE FOOTER : Force la page à prendre 100% de l'écran */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; 
+}
+
+/* LA NAVBAR */
+.navbar { 
+    background-color: #310652; 
+    color: white; 
+    padding: 15px 30px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2); 
+}
+
+/* LE LOGO (Header, Footer ET Bannières) */
+.navbar-brand, .logo-text, .banner h1 { 
+    font-family: 'Orbitron', sans-serif; 
+    font-weight: 900; 
+    text-decoration: none; 
+    color: white; 
+    letter-spacing: 3px; 
+    text-transform: uppercase;
+}
+
+/* On garde la taille de la navbar intacte */
+.navbar-brand {
+    font-size: 1.6rem; 
+}
+.navbar-menu { 
+    display: flex; 
+    align-items: center; 
+}
+.navbar-menu a { 
+    color: white; 
+    text-decoration: none; 
+    margin-left: 20px; 
+    font-weight: bold; 
+    transition: opacity 0.3s; 
+    font-size: 0.95rem; 
+}
+.navbar-menu a:hover { 
+    opacity: 0.8; 
+}
+.btn-nav-profil { 
+    background-color: #6a0dad; 
+    padding: 8px 18px; 
+    border-radius: 20px; 
+    border: 1px solid #8a2be2; 
+}
+.btn-nav-profil:hover { 
+    background-color: #8a2be2; 
+}
+
+/* CONTENEUR PRINCIPAL (Pour les pages comme Connexion/Inscription) */
+.container { 
+    max-width: 800px; 
+    margin: 3rem auto; 
+    padding: 2rem; 
+    background: white; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+    text-align: center; 
+}
+
+/* ========================================= */
+/* LE FOOTER GLOBAL                          */
+/* ========================================= */
+.footer {
+    background-color: #1a032e; /* Un violet encore plus sombre que la navbar */
+    color: #e0e0e0;
+    padding: 50px 20px 20px 20px;
+    margin-top: auto; /* Pousse automatiquement le footer tout en bas ! */
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-around;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 30px;
+    text-align: left;
+}
+
+.footer-col h4 {
+    color: white;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+}
+
+.footer-col a {
+    color: #aaa;
+    text-decoration: none;
+    display: flex; /* ⚠️ On passe de 'block' à 'flex' pour aligner l'image et le texte */
+    align-items: center; /* Centre verticalement */
+    gap: 8px; /* Petit espace entre le logo et le texte */
+    margin-bottom: 10px;
+    transition: 0.3s;
+    font-size: 0.95rem;
+}
+
+.footer-col a:hover {
+    color: #10a37f; /* Vert émeraude au survol */
+    padding-left: 5px; /* Petit effet de mouvement très pro */
+}
+
+.footer-bottom {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+/* Responsive pour les téléphones */
+@media (max-width: 768px) {
+    .footer-content { flex-direction: column; text-align: center; }
+    .footer-col a:hover { padding-left: 0; }
+}

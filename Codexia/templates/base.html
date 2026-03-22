@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Codexia{% endblock %}</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">CODEXIA</a>
+        
+        <div class="navbar-menu">
+            {% if session.get('user_id') %}
+                <a href="/profil" class="btn-nav-profil" style="display: flex; align-items: center; gap: 8px;">
+                    <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="Avatar" style="width: 20px; height: 20px;">
+                    Mon Profil
+                </a>
+                <a href="/deconnexion">Déconnexion</a>
+            {% else %}
+                <a href="/connexion" class="btn-nav-profil">Se connecter</a>
+            {% endif %}
+        </div>
+    </nav>
+    {% block content %}
+    {% endblock %}
+
+    <footer class="footer">
+        <div class="footer-content">
+            
+            <div class="footer-col" style="max-width: 300px;">
+                <h4 class="logo-text" style="font-size: 1.8rem; margin-top: 0; margin-bottom: 5px;">CODEXIA</h4>
+                <p style="color: #aaa; font-size: 0.95rem; line-height: 1.5;">
+                    L'arène d'entraînement ultime pour maîtriser la programmation par la pratique. Forge tes compétences, gagne de l'XP et deviens un Maître du code.
+                </p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Parcours</h4>
+                <a href="/parcours/python">
+                    <img src="{{ url_for('static', filename='images/python.svg') }}" alt="Python" style="width: 16px; height: 16px;"> 
+                    Python
+                </a>
+                <a href="#" style="cursor: not-allowed; opacity: 0.6;">
+                    <img src="{{ url_for('static', filename='images/javascript.svg') }}" alt="JavaScript" style="width: 16px; height: 16px;"> 
+                    JavaScript (Bientôt)
+                </a>
+                <a href="#" style="cursor: not-allowed; opacity: 0.6;">
+                    <img src="{{ url_for('static', filename='images/sql.svg') }}" alt="SQL" style="width: 16px; height: 16px;"> 
+                    SQL (Bientôt)
+                </a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Plateforme</h4>
+                <a href="#">🏆 Classement Général</a> 
+                <a href="/profil">👤 Mon Profil</a>
+                <a href="#">🛡️ Règles de l'Arène</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Légal</h4>
+                <a href="#">Conditions d'utilisation</a>
+                <a href="#">Confidentialité</a>
+                <a href="#">Nous contacter</a>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            &copy; 2026 Codexia - Créé avec passion pour les développeurs.
+        </div>
+    </footer>
+
+</body>
+</html>

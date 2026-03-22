@@ -21,21 +21,17 @@ def niveau_requis(grade_texte):
     niveaux = {"Débutant": 1, "Intermédiaire": 2, "Avancé": 3, "Expert": 4, "Maître": 5}
     return niveaux.get(grade_texte, 1)
 
-# --- ROUTE 1 : LA PAGE D'ACCUEIL ---
+# ==========================================
+# ROUTE 1 : LA VRAIE PAGE D'ACCUEIL (VITRINE)
+# ==========================================
 @app.route('/')
 def accueil():
     conn = get_db_connection()
-    if conn is None:
-        return "Erreur critique : Impossible de se connecter à la base de données."
-
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id_exercice, title, grade_exercice, xp_reward, theme_chapitre, chemin_url FROM exercice ORDER BY numero_ordre ASC")
-    liste_exercices = cursor.fetchall()
     
-    # On prépare le dictionnaire utilisateur
     user_info = None
     if 'user_id' in session:
-        cursor.execute("SELECT username, global_xp FROM utilisateur WHERE id_utilisateur = %s", (session['user_id'],))
+        cursor.execute("SELECT username, global_xp, role FROM utilisateur WHERE id_utilisateur = %s", (session['user_id'],))
         db_user = cursor.fetchone()
         if db_user:
             rang = calculer_rang(db_user['global_xp'])
@@ -43,17 +39,85 @@ def accueil():
                 "username": db_user['username'],
                 "xp": db_user['global_xp'],
                 "titre_rang": rang["titre"],
-                "niveau_actuel": rang["niveau"]
+                "niveau_actuel": rang["niveau"],
+                "role": db_user['role']
+            }
+
+    # On récupère tous les parcours depuis la table 'track' (Python, etc.)
+    cursor.execute("SELECT * FROM track WHERE is_active = 1")
+    tracks = cursor.fetchall()
+    
+    cursor.close()
+    conn.close()
+    
+    return render_template('index.html', user=user_info, tracks=tracks)
+
+# ==========================================
+# ROUTE 1.5 : LE TABLEAU DE BORD DU PARCOURS
+# ==========================================
+@app.route('/parcours/<slug>')
+def parcours(slug):
+    conn = get_db_connection()
+    if conn is None:
+        return "Erreur critique : Impossible de se connecter à la base de données."
+
+    cursor = conn.cursor(dictionary=True)
+    
+    # 1. Vérifier si le langage demandé existe
+    cursor.execute("SELECT id_track, name FROM track WHERE chemin_url = %s", (slug,))
+    track = cursor.fetchone()
+    
+    if not track:
+        conn.close()
+        flash("Ce parcours n'existe pas encore !", "error")
+        return redirect(url_for('accueil'))
+
+    # 2. Récupérer uniquement les exos de CE langage
+    cursor.execute("SELECT id_exercice, title, description, grade_exercice, xp_reward, theme_chapitre, chemin_url FROM exercice WHERE id_track = %s ORDER BY numero_ordre ASC", (track['id_track'],))
+    liste_exercices = cursor.fetchall()
+    
+    user_info = None
+    user_progress = {}
+
+    if 'user_id' in session:
+        cursor.execute("SELECT username, global_xp, role FROM utilisateur WHERE id_utilisateur = %s", (session['user_id'],))
+        db_user = cursor.fetchone()
+        if db_user:
+            rang = calculer_rang(db_user['global_xp'])
+            user_info = {
+                "username": db_user['username'],
+                "xp": db_user['global_xp'],
+                "titre_rang": rang["titre"],
+                "niveau_actuel": rang["niveau"],
+                "role": db_user['role']
             }
             
-    # On ajoute le niveau numérique requis à chaque exercice pour faciliter le blocage HTML
+            cursor.execute("SELECT id_exercice, status_progression FROM progresser WHERE id_utilisateur = %s", (session['user_id'],))
+            progressions = cursor.fetchall()
+            for p in progressions:
+                user_progress[p['id_exercice']] = p['status_progression']
+            
+    # Logique de détermination de la couleur du cercle
     for exo in liste_exercices:
         exo['niveau_requis_num'] = niveau_requis(exo['grade_exercice'])
+        
+        if not user_info:
+            exo['statut_visuel'] = 'locked'
+        elif user_info['role'] != 'admin' and exo['niveau_requis_num'] > user_info['niveau_actuel']:
+            exo['statut_visuel'] = 'locked'
+        else:
+            etat_db = user_progress.get(exo['id_exercice'])
+            if etat_db == 'termine':
+                exo['statut_visuel'] = 'completed'
+            elif etat_db == 'en_cours':
+                exo['statut_visuel'] = 'in_progress'
+            else:
+                exo['statut_visuel'] = 'available'
 
     cursor.close()
     conn.close()
 
-    return render_template('index.html', exercices=liste_exercices, user=user_info)
+    return render_template('parcours.html', exercices=liste_exercices, user=user_info, track_name=track['name'])
 
 # --- ROUTE : INSCRIPTION ---
 @app.route('/inscription', methods=['GET', 'POST'])
@@ -204,6 +268,49 @@ def soumettre_code():
     conn.close()
 
     return jsonify(resultat)
+
+# --- ROUTE 4 : LA PAGE PROFIL ---
+@app.route('/profil')
+def profil():
+    # Sécurité : on vérifie que l'utilisateur est bien connecté
+    if 'user_id' not in session:
+        flash("Tu dois être connecté pour voir ton profil.", "error")
+        return redirect(url_for('connexion'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # 1. On récupère les infos globales de l'utilisateur
+    cursor.execute("SELECT username, email, global_xp, created_at FROM utilisateur WHERE id_utilisateur = %s", (session['user_id'],))
+    user_db = cursor.fetchone()
+
+    # On utilise ta fonction de gamification pour calculer le rang actuel
+    rang_info = calculer_rang(user_db['global_xp'])
+    user_info = {
+        "username": user_db['username'],
+        "email": user_db['email'],
+        "xp": user_db['global_xp'],
+        "titre_rang": rang_info["titre"],
+        "niveau_actuel": rang_info["niveau"],
+        "date_inscription": user_db['created_at'].strftime("%d/%m/%Y") if user_db['created_at'] else "Inconnue"
+    }
+
+    # 2. On récupère l'historique des exercices TERMINÉS
+    # On fait une jointure (JOIN) entre 'progresser' et 'exercice' pour avoir le titre de l'exercice
+    query_historique = """
+        SELECT e.title, e.chemin_url, e.xp_reward, p.completed_at
+        FROM progresser p
+        JOIN exercice e ON p.id_exercice = e.id_exercice
+        WHERE p.id_utilisateur = %s AND p.status_progression = 'termine'
+        ORDER BY p.completed_at DESC
+    """
+    cursor.execute(query_historique, (session['user_id'],))
+    exercices_termines = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('profil.html', user=user_info, historique=exercices_termines)
 
 # --- LANCEMENT DU SERVEUR ---
 if __name__ == '__main__':
