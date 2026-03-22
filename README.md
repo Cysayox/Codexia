@@ -1,7 +1,7 @@
 # Codexia
 
 ## A faire:
--Parcours Javascript
--Parcours SQL
--Classement général
--Page explication systeme niveau
+- Parcours Javascript
+- Parcours SQL
+- Classement général
+- Page explication systeme niveau
