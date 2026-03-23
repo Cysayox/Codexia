@@ -21,7 +21,8 @@
         <div class="navbar-menu">
             {% if session.get('user_id') %}
                 <a href="/profil" class="btn-nav-profil" style="display: flex; align-items: center; gap: 8px;">
-                    <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="Avatar" style="width: 20px; height: 20px;">
+                    <img src="{% if session.get('avatar_url') %}{{ url_for('static', filename=session.get('avatar_url')) }}{% else %}{{ url_for('static', filename='images/avatar.svg') }}{% endif %}" 
+                         alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
                     Mon Profil
                 </a>
                 <a href="/deconnexion">Déconnexion</a>

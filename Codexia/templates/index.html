@@ -94,7 +94,9 @@
                     <p style="margin: 0; color: #666; font-size: 1.1rem;">Prêt pour ton prochain défi ?</p>
                     
                     <div style="display: flex; align-items: center; gap: 15px; margin-top: 25px;">
-                        <img src="{{ url_for('static', filename='images/profil.svg') }}" alt="Profil" style="width: 55px; height: 55px; border-radius: 50%; background: #f4f4f9; padding: 5px; border: 2px solid #6a0dad; object-fit: contain;">
+                        
+                        <img src="{% if user.avatar_url %}{{ url_for('static', filename=user.avatar_url) }}{% else %}{{ url_for('static', filename='images/profil.svg') }}{% endif %}" 
+                             alt="Profil" style="width: 55px; height: 55px; border-radius: 50%; background: #f4f4f9; padding: 5px; border: 2px solid #6a0dad; object-fit: cover;">
                         
                         <div style="flex: 1; max-width: 400px;">
                             <div style="font-weight: bold; font-size: 1.15rem; color: #310652; margin-bottom: 5px;">{{ user.username }}</div>
