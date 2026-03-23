@@ -33,21 +33,25 @@ def get_user_progress(user_id):
     conn.close()
     return {p['id_exercice']: p['status_progression'] for p in progressions}
 
-def get_exercice_by_slug(chemin_url):
-    """Récupère un exercice spécifique pour l'arène."""
+# ⚠️ LA FONCTION QUI MANQUAIT EST ICI ⚠️
+def get_exercice_by_slug(slug):
+    """Récupère toutes les infos d'un exercice selon son URL."""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM exercice WHERE chemin_url = %s", (chemin_url,))
+    cursor.execute("SELECT * FROM exercice WHERE chemin_url = %s", (slug,))
     exercice = cursor.fetchone()
     cursor.close()
     conn.close()
     return exercice
 
 def get_exercice_for_validation(id_exercice):
-    """Récupère les tests cachés et l'XP d'un exercice pour l'API de validation."""
+    """Récupère le test caché, l'XP et l'ID du parcours de l'exercice pour la validation."""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT test_code, xp_reward FROM exercice WHERE id_exercice = %s", (id_exercice,))
+    
+    # id_track est bien présent ici !
+    cursor.execute("SELECT id_track, test_code, xp_reward FROM exercice WHERE id_exercice = %s", (id_exercice,))
+    
     exo = cursor.fetchone()
     cursor.close()
     conn.close()

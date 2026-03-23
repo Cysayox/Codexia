@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, jsonify, session, redirec
 from utils import calculer_rang, niveau_requis
 from moteur_codexia import evaluer_code
 
-# Import exclusif des requêtes de parcours !
 from models.parcours_model import (get_track_by_slug, get_exercices_by_track, 
                                    get_user_progress, get_exercice_by_slug, 
                                    get_exercice_for_validation, enregistrer_soumission, 
@@ -78,13 +77,20 @@ def soumettre_code():
     if not exo:
         return jsonify({"status": "failed", "output": "Exercice introuvable dans la BDD."}), 404
 
-    resultat = evaluer_code(code_utilisateur, exo['test_code'])
+    # On détermine le langage selon l'id_track (1 = Python, 2 = JS)
+    langage_choisi = 'javascript' if exo['id_track'] == 2 else 'python'
+
+    # On passe l'argument 'langage' à notre moteur
+    resultat = evaluer_code(code_utilisateur, exo['test_code'], langage=langage_choisi)
+    
     db_status = 'success' if resultat['status'] == 'success' else 'failed'
     
+    # Sauvegarde en base de données
     enregistrer_soumission(id_utilisateur, id_exercice, code_utilisateur, db_status, resultat['output'])
 
-    if db_status == 'success':
+    if resultat['status'] == 'success':
         valider_exercice_et_donner_xp(id_utilisateur, id_exercice, exo['xp_reward'])
+        # Optionnel : Mettre à jour la session immédiatement pour l'affichage visuel
         session['xp'] = session.get('xp', 0) + exo['xp_reward']
 
     return jsonify(resultat)
