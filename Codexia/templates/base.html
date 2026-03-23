@@ -16,70 +16,79 @@
 <body>
 
     <nav class="navbar">
-        <a href="/" class="navbar-brand">CODEXIA</a>
+        <div class="navbar-left">
+            <a href="/" class="navbar-brand">CODEXIA</a>
+            
+            <div class="dropdown">
+                <a href="#" class="nav-link-orbitron" style="display: flex; align-items: center; gap: 6px;">
+                    Parcours <span style="font-size: 0.7em;">▼</span>
+                </a>
+                <div class="dropdown-content">
+                    <a href="/parcours/python">
+                        <img src="{{ url_for('static', filename='images/python.svg') }}" style="width: 25px;" alt="Python"> 
+                        Python
+                    </a>
+                    <a href="#" style="color: #aaa; cursor: not-allowed;">
+                        <img src="{{ url_for('static', filename='images/javascript.svg') }}" style="width: 25px; filter: grayscale(100%); opacity: 0.6;" alt="JS"> 
+                        JavaScript
+                    </a>
+                    <a href="#" style="color: #aaa; cursor: not-allowed;">
+                        <img src="{{ url_for('static', filename='images/sql.svg') }}" style="width: 25px; filter: grayscale(100%); opacity: 0.6;" alt="SQL"> 
+                        SQL
+                    </a>
+                </div>
+            </div>
+
+            <a href="/classement" class="nav-link-orbitron">Classement</a>
+        </div>
         
-        <div class="navbar-menu">
+        <div class="navbar-right">
             {% if session.get('user_id') %}
                 <a href="/profil" class="btn-nav-profil" style="display: flex; align-items: center; gap: 8px;">
                     <img src="{% if session.get('avatar_url') %}{{ url_for('static', filename=session.get('avatar_url')) }}{% else %}{{ url_for('static', filename='images/avatar.svg') }}{% endif %}" 
                          alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
                     Mon Profil
                 </a>
-                <a href="/deconnexion">Déconnexion</a>
+                <a href="/deconnexion" style="color: #ffffff; font-weight: bold; text-decoration: none; font-size: 0.9rem;">Déconnexion</a>
             {% else %}
                 <a href="/connexion" class="btn-nav-profil">Se connecter</a>
             {% endif %}
         </div>
     </nav>
+
     {% block content %}
     {% endblock %}
 
     <footer class="footer">
         <div class="footer-content">
-            
             <div class="footer-col" style="max-width: 300px;">
                 <h4 class="logo-text" style="font-size: 1.8rem; margin-top: 0; margin-bottom: 5px;">CODEXIA</h4>
                 <p style="color: #aaa; font-size: 0.95rem; line-height: 1.5;">
                     L'arène d'entraînement ultime pour maîtriser la programmation par la pratique. Forge tes compétences, gagne de l'XP et deviens un Maître du code.
                 </p>
             </div>
-
             <div class="footer-col">
                 <h4>Parcours</h4>
-                <a href="/parcours/python">
-                    <img src="{{ url_for('static', filename='images/python.svg') }}" alt="Python" style="width: 16px; height: 16px;"> 
-                    Python
-                </a>
-                <a href="#" style="cursor: not-allowed; opacity: 0.6;">
-                    <img src="{{ url_for('static', filename='images/javascript.svg') }}" alt="JavaScript" style="width: 16px; height: 16px;"> 
-                    JavaScript (Bientôt)
-                </a>
-                <a href="#" style="cursor: not-allowed; opacity: 0.6;">
-                    <img src="{{ url_for('static', filename='images/sql.svg') }}" alt="SQL" style="width: 16px; height: 16px;"> 
-                    SQL (Bientôt)
-                </a>
+                <a href="/parcours/python"><img src="{{ url_for('static', filename='images/python.svg') }}" alt="Python" style="width: 16px; height: 16px;"> Python</a>
+                <a href="#" style="cursor: not-allowed; opacity: 0.6;"><img src="{{ url_for('static', filename='images/javascript.svg') }}" alt="JavaScript" style="width: 16px; height: 16px;"> JavaScript (Bientôt)</a>
+                <a href="#" style="cursor: not-allowed; opacity: 0.6;"><img src="{{ url_for('static', filename='images/sql.svg') }}" alt="SQL" style="width: 16px; height: 16px;"> SQL (Bientôt)</a>
             </div>
-
             <div class="footer-col">
                 <h4>Plateforme</h4>
-                <a href="#">🏆 Classement Général</a> 
+                <a href="/classement">🏆 Classement Général</a> 
                 <a href="/profil">👤 Mon Profil</a>
                 <a href="#">🛡️ Règles de l'Arène</a>
             </div>
-
             <div class="footer-col">
                 <h4>Légal</h4>
                 <a href="#">Conditions d'utilisation</a>
                 <a href="#">Confidentialité</a>
                 <a href="#">Nous contacter</a>
             </div>
-
         </div>
-
         <div class="footer-bottom">
             &copy; 2026 Codexia - Créé avec passion pour les développeurs.
         </div>
     </footer>
-
 </body>
 </html>

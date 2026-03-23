@@ -13,7 +13,9 @@ body {
     min-height: 100vh; 
 }
 
-/* LA NAVBAR */
+/* ========================================= */
+/* LA NAVBAR GLOBALE                         */
+/* ========================================= */
 .navbar { 
     background-color: #310652; 
     color: white; 
@@ -34,33 +36,127 @@ body {
     text-transform: uppercase;
 }
 
-/* On garde la taille de la navbar intacte */
 .navbar-brand {
     font-size: 1.6rem; 
 }
-.navbar-menu { 
-    display: flex; 
-    align-items: center; 
+
+/* STRUCTURE GAUCHE / DROITE */
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 35px;
 }
-.navbar-menu a { 
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* ⚠️ LA CORRECTION EST ICI : On remet les liens de droite en blanc */
+.navbar-right a { 
     color: white; 
     text-decoration: none; 
-    margin-left: 20px; 
     font-weight: bold; 
     transition: opacity 0.3s; 
     font-size: 0.95rem; 
 }
-.navbar-menu a:hover { 
+
+.navbar-right a:hover { 
     opacity: 0.8; 
 }
+
+/* BOUTON PROFIL ET CONNEXION */
 .btn-nav-profil { 
     background-color: #6a0dad; 
     padding: 8px 18px; 
     border-radius: 20px; 
     border: 1px solid #8a2be2; 
+    color: white !important; /* Force le blanc */
+    text-decoration: none !important; /* Enlève le soulignement */
 }
+
 .btn-nav-profil:hover { 
     background-color: #8a2be2; 
+}
+
+/* LIENS ORBITRON (Gauche) */
+.nav-link-orbitron {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.05rem;
+    color: white; 
+    text-decoration: none;
+    letter-spacing: 1px;
+    transition: color 0.3s;
+}
+
+.nav-link-orbitron:hover {
+    color: #ffffff; 
+}
+
+/* --- LE MENU DÉROULANT --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #ffffff;
+    min-width: 250px; 
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.15);
+    z-index: 1000;
+    border-radius: 8px; 
+    overflow: hidden;
+    top: 100%;
+    left: 0;
+    border: 1px solid #eee;
+    
+    /* ⚠️ 1. On remet un espace pour descendre la boîte visuellement */
+    margin-top: 18px; 
+}
+
+/* --- Les liens à l'intérieur du menu --- */
+.dropdown-content a {
+    color: #310652;
+    padding: 12px 16px; 
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: sans-serif; 
+    font-weight: bold;
+    font-size: 1.2rem; 
+    transition: background 0.2s;
+    
+    /* ⚠️ NOUVEAU : Le fameux trait de séparation (gris très clair) */
+    border-bottom: 1px solid #f0f0f0; 
+}
+
+/* ⚠️ NOUVEAU : On enlève le trait pour le tout dernier élément (SQL) */
+.dropdown-content a:last-child {
+    border-bottom: none;
+}
+
+.dropdown-content a:hover {
+    background-color: #f4eff9;
+    color: #6a0dad;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* ⚠️ 2. LE PONT INVISIBLE MAGIQUE */
+.dropdown::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 25px; /* Couvre largement le vide jusqu'au sous-menu */
+    background: transparent; /* Totalement invisible ! */
 }
 
 /* CONTENEUR PRINCIPAL (Pour les pages comme Connexion/Inscription) */
@@ -78,10 +174,10 @@ body {
 /* LE FOOTER GLOBAL                          */
 /* ========================================= */
 .footer {
-    background-color: #1a032e; /* Un violet encore plus sombre que la navbar */
+    background-color: #1a032e; 
     color: #e0e0e0;
     padding: 50px 20px 20px 20px;
-    margin-top: auto; /* Pousse automatiquement le footer tout en bas ! */
+    margin-top: auto; 
 }
 
 .footer-content {
@@ -104,17 +200,17 @@ body {
 .footer-col a {
     color: #aaa;
     text-decoration: none;
-    display: flex; /* ⚠️ On passe de 'block' à 'flex' pour aligner l'image et le texte */
-    align-items: center; /* Centre verticalement */
-    gap: 8px; /* Petit espace entre le logo et le texte */
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
     margin-bottom: 10px;
     transition: 0.3s;
     font-size: 0.95rem;
 }
 
 .footer-col a:hover {
-    color: #10a37f; /* Vert émeraude au survol */
-    padding-left: 5px; /* Petit effet de mouvement très pro */
+    color: #10a37f; 
+    padding-left: 5px; 
 }
 
 .footer-bottom {

@@ -13,29 +13,6 @@
     <p>L'arène d'entraînement pour maîtriser le code</p>
 </div>
 
-{% if session.get('user_id') %}
-    <div class="dashboard-container" style="margin-top: -30px; position: relative; z-index: 10;">
-        <div style="background: white; padding: 20px 25px; border-radius: 8px; border-left: 6px solid {% if user.role == 'admin' %}#e74c3c{% else %}#6a0dad{% endif %}; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
-            {% if user.role == 'admin' %}
-                <div>
-                    <h2 style="margin: 0 0 5px 0; font-size: 1.3rem; color: #e74c3c;">Mode Administrateur 👑</h2>
-                    <p style="margin: 0; color: #666; font-size: 0.95rem;">Bienvenue {{ user.username }}. Les restrictions de niveaux sont désactivées pour toi.</p>
-                </div>
-                <div style="text-align: right;"><span style="font-size: 1.1rem; font-weight: bold; color: #e74c3c;">Staff Codexia</span></div>
-            {% else %}
-                <div>
-                    <h2 style="margin: 0 0 5px 0; font-size: 1.3rem;">Bon retour, {{ user.username }} !</h2>
-                    <p style="margin: 0; color: #666; font-size: 0.95rem;">Prêt pour ton prochain défi ?</p>
-                </div>
-                <div style="text-align: right;">
-                    <span style="font-size: 1.1rem; font-weight: bold; color: #310652;">{{ user.titre_rang }}</span><br>
-                    <span style="color: #6a0dad; font-weight: bold; font-size: 0.95rem;">💎 {{ user.xp }} XP</span>
-                </div>
-            {% endif %}
-        </div>
-    </div>
-{% endif %}
-
 <div class="dashboard-container" id="exercices">
     <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">Parcours {{ track_name }}</h2>
     

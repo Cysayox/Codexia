@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Classement Général - Codexia{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/leaderboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="banner">
+    <h1>CLASSEMENT GÉNÉRAL</h1>
+    <p>Le Panthéon des 10 meilleurs codeurs de l'Arène</p>
+</div>
+
+<div class="leaderboard-container">
+    <h2 class="leaderboard-title">🏆 Top 10 Codexia</h2>
+    
+    {% for u in top_users %}
+    <div class="rank-row">
+        <div class="rank-pos {% if u.position == 1 %}pos-1{% elif u.position == 2 %}pos-2{% elif u.position == 3 %}pos-3{% endif %}">
+            {% if u.position == 1 %}🥇{% elif u.position == 2 %}🥈{% elif u.position == 3 %}🥉{% else %}{{ u.position }}{% endif %}
+        </div>
+        
+        <img src="{% if u.avatar_url %}{{ url_for('static', filename=u.avatar_url) }}{% else %}{{ url_for('static', filename='images/profil.svg') }}{% endif %}" alt="Avatar" class="rank-avatar">
+        
+        <div class="rank-info">
+            <p class="rank-name">{{ u.username }}</p>
+            <span class="rank-title">{{ u.titre_rang }}</span>
+        </div>
+        
+        <div class="rank-xp">
+            💎 {{ u.global_xp }} <span style="font-size: 1rem; color: #aaa;">XP</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

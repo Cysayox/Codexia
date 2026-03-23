@@ -1,0 +1,74 @@
+/* ========================================= */
+/* STYLE DE LA BANNIÈRE (Identique au Profil) */
+/* ========================================= */
+.banner { 
+    background-color: #6a0dad; 
+    color: #ffffff; 
+    padding: 4rem 1rem; 
+    text-align: center; 
+}
+
+.banner h1 { 
+    margin: 0; 
+    font-size: 3.5rem; 
+    letter-spacing: 2px; 
+    font-family: 'Orbitron', sans-serif;
+}
+
+.banner p { 
+    font-size: 1.2rem; 
+    opacity: 0.9; 
+    margin-top: 10px; 
+    /* ⚠️ La petite phrase est maintenant en Orbitron ! */
+    font-family: 'Orbitron', sans-serif; 
+}
+
+/* ========================================= */
+/* STYLE DU TABLEAU DE CLASSEMENT            */
+/* ========================================= */
+.leaderboard-container { 
+    /* ⚠️ LARGEUR DU TABLEAU : Tu peux modifier cette valeur (ex: 1200px, 1000px, 80%...) */
+    max-width: 1000px; 
+    width: 95%; 
+    margin: 30px auto 50px auto; 
+    background: white; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+    padding: 40px; 
+    border: 1px solid #eef; 
+}
+
+.leaderboard-title { 
+    text-align: center; 
+    color: #310652; 
+    margin-top: 0; 
+    margin-bottom: 30px; 
+    font-size: 2.2rem; 
+}
+
+.rank-row { 
+    display: flex; 
+    align-items: center; 
+    padding: 15px 20px; 
+    border-bottom: 1px solid #f0f0f0; 
+    transition: background 0.2s; 
+    border-radius: 8px;
+}
+
+.rank-row:hover { background: #f9f9fb; }
+.rank-row:last-child { border-bottom: none; }
+
+.rank-pos { font-size: 1.5rem; font-weight: bold; width: 60px; text-align: center; color: #888; }
+.pos-1 { font-size: 2.5rem; } 
+.pos-2 { font-size: 2.2rem; } 
+.pos-3 { font-size: 2rem; } 
+
+.rank-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin: 0 25px; border: 3px solid #eee; background: #f4f4f9; }
+.pos-1 + .rank-avatar { border-color: #f1c40f; box-shadow: 0 0 15px rgba(241, 196, 15, 0.4); }
+.pos-2 + .rank-avatar { border-color: #bdc3c7; }
+.pos-3 + .rank-avatar { border-color: #cd7f32; }
+
+.rank-info { flex: 1; }
+.rank-name { font-size: 1.3rem; font-weight: bold; color: #333; margin: 0 0 8px 0; }
+.rank-title { font-size: 0.95rem; color: #6a0dad; font-weight: bold; background: #f4eff9; padding: 5px 12px; border-radius: 20px; display: inline-block;}
+.rank-xp { font-size: 1.5rem; font-weight: bold; color: #10a37f; text-align: right;}
