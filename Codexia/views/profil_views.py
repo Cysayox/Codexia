@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 from utils import calculer_rang, allowed_file
 from models.profil_model import (get_user_by_id, get_historique_user, 
                                  update_profil_base, update_password, 
-                                 update_avatar, delete_utilisateur)
+                                 update_avatar, delete_utilisateur,get_user_stats_by_track)
 
 # Création du Blueprint pour le profil
 profil_bp = Blueprint('profil', __name__)
@@ -22,8 +22,15 @@ def profil():
     # On utilise nos fonctions SQL du Modèle
     user_db = get_user_by_id(user_id)
     historique = get_historique_user(user_id)
+    
+    # ⚠️ NOUVEAUTÉ : On récupère l'XP de chaque langage ET on passe le nom du langage à la fonction
+    stats_tracks = get_user_stats_by_track(user_id)
+    for stat in stats_tracks:
+        stat['rang_info'] = calculer_rang(stat['xp'], track_name=stat['track_name'])
 
-    rang_info = calculer_rang(user_db['global_xp'])
+    # ⚠️ NOUVEAUTÉ : On précise 'global' pour le rang général du joueur
+    rang_info = calculer_rang(user_db['global_xp'], track_name='global')
+    
     user_info = {
         "username": user_db['username'],
         "email": user_db['email'],
@@ -34,7 +41,7 @@ def profil():
         "avatar_url": user_db['avatar_url']
     }
 
-    return render_template('profil.html', user=user_info, historique=historique)
+    return render_template('profil.html', user=user_info, historique=historique, stats_tracks=stats_tracks)
 
 
 @profil_bp.route('/profil/modifier', methods=['GET', 'POST'])
