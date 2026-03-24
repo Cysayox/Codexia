@@ -5,7 +5,7 @@ from moteur_codexia import evaluer_code
 from models.parcours_model import (get_track_by_slug, get_exercices_by_track, 
                                    get_user_progress, get_exercice_by_slug, 
                                    get_exercice_for_validation, enregistrer_soumission, 
-                                   valider_exercice_et_donner_xp, get_user_track_xp)
+                                   valider_exercice_et_donner_xp, get_user_track_xp, get_next_exercice)
 from models.profil_model import get_user_by_id
 
 parcours_bp = Blueprint('parcours', __name__)
@@ -58,15 +58,31 @@ def parcours(slug):
             else:
                 exo['statut_visuel'] = 'available'
 
-    return render_template('parcours.html', exercices=liste_exercices, user=user_info, track_name=track['name'])
+    # ⚠️ NOUVEAUTÉ : On crée un dictionnaire classé dans le bon ordre
+    niveaux_ordre = ['Débutant', 'Intermédiaire', 'Avancé', 'Expert', 'Maître']
+    exercices_groupes = {niveau: [] for niveau in niveaux_ordre}
+    
+    for exo in liste_exercices:
+        if exo['grade_exercice'] in exercices_groupes:
+            exercices_groupes[exo['grade_exercice']].append(exo)
 
+    # On retire les niveaux qui seraient vides (ex: si tu n'as pas encore créé de niveau Maître)
+    exercices_groupes = {k: v for k, v in exercices_groupes.items() if len(v) > 0}
+
+    # ⚠️ On ajoute "exercices_groupes" dans le render_template !
+    return render_template('parcours.html', exercices=liste_exercices, exercices_groupes=exercices_groupes, user=user_info, track_name=track['name'])
 
 @parcours_bp.route('/exercice/<chemin_url>')
 def afficher_exercice(chemin_url):
     exercice = get_exercice_by_slug(chemin_url)
     if exercice is None:
         return "Erreur 404 : Exercice introuvable dans la base de données.", 404
-    return render_template('exercice.html', exercice=exercice)
+    
+    # On cherche l'exercice suivant
+    next_exo = get_next_exercice(exercice['id_track'], exercice['numero_ordre'])
+    
+    # On l'envoie au template
+    return render_template('exercice.html', exercice=exercice, next_exo=next_exo)
 
 @parcours_bp.route('/api/soumettre', methods=['POST'])
 def soumettre_code():
