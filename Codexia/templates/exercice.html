@@ -36,10 +36,18 @@
             </div>
         {% endif %}
         
+        
+        
         <hr style="margin-top: 30px;">
         <p><strong>💎 Récompense :</strong> {{ exercice.xp_reward }} XP</p>
         
-        <a href="/" style="display: inline-block; margin-top: 20px; color: #6a0dad; text-decoration: none; font-weight: bold;">← Quitter l'exercice</a>
+        <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <a href="/parcours/{{ exercice.track_slug }}" style="color: #6a0dad; text-decoration: none; font-weight: bold;">← Quitter l'exercice</a>
+            
+            {% if next_exo %}
+            <a href="/exercice/{{ next_exo.chemin_url }}" id="btn-next" style="display: none; background: #6a0dad; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; transition: 0.3s;">Exercice suivant →</a>
+            {% endif %}
+        </div>
     </div>
     
     <div class="workspace">
@@ -106,6 +114,12 @@
                 consoleOutput.innerText = "> SUCCÈS !\n> " + data.output;
                 btn.innerText = "Exercice Validé !";
                 btn.style.background = "#10a37f";
+                
+                // ⚠️ NOUVEAUTÉ : On affiche le bouton "Suivant" en douceur
+                const btnNext = document.getElementById('btn-next');
+                if (btnNext) {
+                    btnNext.style.display = 'inline-block';
+                }
             } else {
                 consoleOutput.style.color = '#ff4444';
                 consoleOutput.innerText = "> ÉCHEC DE L'EXÉCUTION :\n\n" + data.output;
