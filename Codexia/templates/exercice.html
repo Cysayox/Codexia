@@ -42,7 +42,7 @@
         <p><strong>💎 Récompense :</strong> {{ exercice.xp_reward }} XP</p>
         
         <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-            <a href="/parcours/{{ exercice.track_slug }}" style="color: #6a0dad; text-decoration: none; font-weight: bold;">← Quitter l'exercice</a>
+            <a href="/parcours/{{ exercice.track_slug }}#exo-{{ exercice.chemin_url }}" style="color: #6a0dad; text-decoration: none; font-weight: bold;">← Quitter l'exercice</a>
             
             {% if next_exo %}
             <a href="/exercice/{{ next_exo.chemin_url }}" id="btn-next" style="display: none; background: #6a0dad; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; transition: 0.3s;">Exercice suivant →</a>
