@@ -1,8 +1,8 @@
 # Codexia
 
 ## A faire:
-- Page explication systeme niveau
-- créé la logique Python pour trouver le "dernier parcours joué"
+- Page explication systeme niveau (optionnel)
+- créé la logique Python pour trouver le "dernier parcours joué" (optionnel)
 - Correction quand on a fini l'exercice (qui est la même pour tous les utilisateurs) (urgent)
 - les attributs pour les exercices SQL
 - liste déroulante par niveau d'exercice pour python (urgent)
@@ -14,4 +14,4 @@
 - Parcours Javascript ✅
 - Parcours SQL ✅
 - Panel Administrateur ✅
-- Titres & Hauts Faits
+- Titres & Hauts Faits ✅
