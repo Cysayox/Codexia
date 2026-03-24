@@ -24,8 +24,16 @@
 <div class="main-content">
     <div class="instructions">
         <h2>{{ exercice.title }} <span style="font-size: 0.6em; color: #6a0dad;">({{ exercice.grade_exercice }})</span></h2>
+        
+        {% if exercice.description %}
+            <div style="margin-bottom: 20px; line-height: 1.5; color: #333;">
+                {{ exercice.description | safe }}
+            </div>
+        {% endif %}
+
         <h3>Consignes</h3>
-        <p>{{ exercice.instructions | default('Écris ton code en Python pour résoudre ce problème.', true) }}</p>
+        <p>{{ exercice.instructions | default('Écris ton code pour résoudre ce problème.', true) | safe }}</p>
+        
         <hr>
         <p><strong>💎 Récompense :</strong> {{ exercice.xp_reward }} XP</p>
         
@@ -47,13 +55,20 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
 <script>
-    const codeDeBase = `{{ exercice.base_code | default('def ma_fonction():\n    # Ton code ici\n    pass', true) }}`;
+    // Ajout de |safe pour éviter que les guillemets du code de base ne fassent planter le JavaScript
+    const codeDeBase = `{{ exercice.base_code | default('# Ton code ici', true) | safe }}`;
+
+    // ⚠️ NOUVEAUTÉ : Détection dynamique du langage de l'éditeur !
+    let editeurLangage = 'python';
+    const trackId = {{ exercice.id_track | default(1) }};
+    if (trackId === 2) { editeurLangage = 'javascript'; }
+    if (trackId === 3) { editeurLangage = 'sql'; }
 
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' }});
     require(['vs/editor/editor.main'], function() {
         window.monacoEditor = monaco.editor.create(document.getElementById('editor-container'), {
             value: codeDeBase,
-            language: 'python',
+            language: editeurLangage, // Utilise la bonne coloration syntaxique !
             theme: 'vs-dark',
             automaticLayout: true,
             fontSize: 16,
