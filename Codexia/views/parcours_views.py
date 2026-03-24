@@ -77,9 +77,8 @@ def soumettre_code():
     if not exo:
         return jsonify({"status": "failed", "output": "Exercice introuvable dans la BDD."}), 404
 
-    # On détermine le langage selon l'id_track (1 = Python, 2 = JS)
-    langage_choisi = 'javascript' if exo['id_track'] == 2 else 'python'
-
+    # On détermine le langage selon l'id_track (1 = Python, 2 = JS, 3 = SQL)
+    langage_choisi = 'sql' if exo['id_track'] == 3 else ('javascript' if exo['id_track'] == 2 else 'python')
     # On passe l'argument 'langage' à notre moteur
     resultat = evaluer_code(code_utilisateur, exo['test_code'], langage=langage_choisi)
     
