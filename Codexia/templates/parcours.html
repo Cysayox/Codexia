@@ -99,7 +99,11 @@
                             </div>
                             
                             <p class="challenge-desc">
-                                {{ exo.description | default("Résous ce défi pour gagner de l'XP.", true) }}
+                                {% if exo.description %}
+                                    {{ (exo.description | striptags).split('.')[0] }}.
+                                {% else %}
+                                    Résous ce défi pour gagner de l'XP.
+                                {% endif %}
                             </p>
                             
                             <div class="tags-container">
