@@ -44,12 +44,21 @@
         
         <div class="navbar-right">
             {% if session.get('user_id') %}
-                <a href="/profil" class="btn-nav-profil" style="display: flex; align-items: center; gap: 8px;">
-                    <img src="{% if session.get('avatar_url') %}{{ url_for('static', filename=session.get('avatar_url')) }}{% else %}{{ url_for('static', filename='images/avatar.svg') }}{% endif %}" 
-                         alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
-                    Mon Profil
-                </a>
-                <a href="/deconnexion" style="color: #ffffff; font-weight: bold; text-decoration: none; font-size: 0.9rem;">Déconnexion</a>
+                
+                {% if user and user.role == 'admin' %}
+                    <span style="color: #e74c3c; font-weight: bold; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; margin-right: 15px;">
+                        ADMINISTRATEUR
+                    </span>
+                {% else %}
+                    <a href="/profil" class="btn-nav-profil" style="display: flex; align-items: center; gap: 8px;">
+                        <img src="{% if session.get('avatar_url') %}{{ url_for('static', filename=session.get('avatar_url')) }}{% else %}{{ url_for('static', filename='images/avatar.svg') }}{% endif %}" 
+                             alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                        Mon Profil
+                    </a>
+                {% endif %}
+
+                <a href="/deconnexion" style="color: white; font-weight: bold; text-decoration: none; font-size: 0.9rem;">Déconnexion</a>
+            
             {% else %}
                 <a href="/connexion" class="btn-nav-profil">Se connecter</a>
             {% endif %}
@@ -70,8 +79,8 @@
             <div class="footer-col">
                 <h4>Parcours</h4>
                 <a href="/parcours/python"><img src="{{ url_for('static', filename='images/python.svg') }}" alt="Python" style="width: 16px; height: 16px;"> Python</a>
-                <a href="#" style="cursor: not-allowed; opacity: 0.6;"><img src="{{ url_for('static', filename='images/javascript.svg') }}" alt="JavaScript" style="width: 16px; height: 16px;"> JavaScript (Bientôt)</a>
-                <a href="#" style="cursor: not-allowed; opacity: 0.6;"><img src="{{ url_for('static', filename='images/sql.svg') }}" alt="SQL" style="width: 16px; height: 16px;"> SQL (Bientôt)</a>
+                <a href="/parcours/javascript"><img src="{{ url_for('static', filename='images/javascript.svg') }}" alt="JavaScript" style="width: 16px; height: 16px;"> JavaScript</a>
+                <a href="/parcours/sql"><img src="{{ url_for('static', filename='images/sql.svg') }}" alt="SQL" style="width: 16px; height: 16px;"> SQL</a>
             </div>
             <div class="footer-col">
                 <h4>Plateforme</h4>

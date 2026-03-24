@@ -8,7 +8,7 @@ def get_top_users(limit=10):
     
     # ⚠️ NOUVEAU : On exclut les admins et on limite à 10
     cursor.execute('''
-        SELECT username, global_xp, avatar_url
+        SELECT id_utilisateur,username, global_xp, avatar_url
         FROM utilisateur 
         WHERE role != 'admin'
         ORDER BY global_xp DESC 

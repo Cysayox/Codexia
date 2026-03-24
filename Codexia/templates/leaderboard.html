@@ -25,7 +25,18 @@
         
         <div class="rank-info">
             <p class="rank-name">{{ u.username }}</p>
-            <span class="rank-title">{{ u.titre_rang }}</span>
+            
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="rank-title">{{ u.titre_rang }}</span>
+                
+                <div style="display: flex; gap: 5px;">
+                    {% for badge in u.badges_obtenus %}
+                        <div title="{{ badge.nom }}" style="width: 24px; height: 24px; border-radius: 50%; background: {{ badge.couleur }}; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <img src="{{ url_for('static', filename='images/' ~ badge.icone) }}" style="width: 14px; height: 14px; filter: brightness(0) invert(1);">
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
         
         <div class="rank-xp">

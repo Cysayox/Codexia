@@ -21,7 +21,17 @@
         </div>
         
         <h2 class="profil-username">{{ user.username }}</h2>
-        <div class="profil-rank">👑 {{ user.titre_rang }} Général</div>
+        <div class="profil-rank">👑 {{ user.titre_rang }}</div>
+        
+        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+            {% for badge in recompenses.badges %}
+                {% if badge.debloque %}
+                <div title="{{ badge.nom }}" style="width: 35px; height: 35px; border-radius: 50%; background: {{ badge.couleur }}; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.15);">
+                    <img src="{{ url_for('static', filename='images/' ~ badge.icone) }}" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
         <div class="profil-date">Membre depuis le {{ user.date_inscription }}</div>
         
         <div class="xp-container">
@@ -39,11 +49,11 @@
 
         <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
             <a href="/profil/modifier" style="flex: 1; text-align: center; background: #f4f4f9; color: #310652; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; border: 1px solid #dcdce6; transition: 0.3s;">
-                ✏️ Modifier le profil
+                 Modifier le profil
             </a>
             
             <button onclick="document.getElementById('delete-zone').style.display='block'" style="flex: 1; background: white; color: #e74c3c; border: 1px solid #e74c3c; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s;">
-                🗑️ Supprimer le compte
+                 Supprimer le compte
             </button>
         </div>
 
@@ -63,13 +73,36 @@
     <main class="profil-details">
         
         <section class="details-section">
-            <h3>Titres & Hauts Faits</h3>
-            <p style="font-size: 0.9rem; color: #666; margin-top: 0;">Débloque des titres exclusifs en prouvant ta valeur.</p>
-            <div class="badges-grid">
-                <div class="badge-locked" style="border-color: #10a37f; color: #10a37f; background: #e6f6f2;">🎖️ Amateur du code</div>
-                <div class="badge-locked">🔒 Pro de la Programmation</div>
-                <div class="badge-locked">🔒 Maître en Python</div>
-                <div class="badge-locked">🔒 Maître absolu du code</div>
+            <h3>Les 10 Titres de Codexia</h3>
+            <div class="badges-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                {% for titre in recompenses.titres %}
+                    {% if titre.debloque %}
+                        <div class="badge-locked" style="border-color: #6a0dad; color: #6a0dad; background: #f4eff9; display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-radius: 8px; font-weight: bold;" title="Débloqué">
+                            <span>🏆 {{ titre.nom }}</span>
+                            <span style="font-size: 0.8rem; color: #310652;">Obtenu</span>
+                        </div>
+                    {% else %}
+                        <div class="badge-locked" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-radius: 8px; border: 1px solid #ddd; background: #fafafa; color: #888;" title="Requis : {{ titre.requis }} XP">
+                            <span>🔒 {{ titre.nom }}</span>
+                            <span style="font-size: 0.8rem;">{{ titre.requis }} XP</span>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <h3 style="margin-top: 35px;">Badges de Maîtrise</h3>
+            <div class="badges-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                {% for badge in recompenses.badges %}
+                    {% if badge.debloque %}
+                        <div class="badge-locked" style="border-color: {{ badge.couleur }}; color: {{ badge.couleur }}; background: #fff; display: flex; justify-content: center; align-items: center; padding: 12px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            ✅ {{ badge.nom }}
+                        </div>
+                    {% else %}
+                        <div class="badge-locked" style="display: flex; justify-content: center; align-items: center; padding: 12px; border-radius: 8px; border: 1px dashed #ccc; background: #f9f9f9; color: #aaa;">
+                            🔒 {{ badge.nom }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
             </div>
         </section>
 

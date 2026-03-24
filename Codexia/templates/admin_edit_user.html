@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier l'utilisateur - Admin Codexia{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-container { max-width: 600px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 6px solid #e74c3c; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #eee; }
+    .admin-header h2 { margin: 0; color: #310652; display: flex; align-items: center; gap: 10px; }
+    
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; font-size: 0.95rem; }
+    input[type="text"], input[type="email"], input[type="number"] { 
+        width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 1rem;
+    }
+    
+    .btn-save { background: #10a37f; color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; width: 100%; }
+    .btn-save:hover { background: #0d8a6a; }
+
+    /* Nouveau bouton pour l'email */
+    .btn-reset { background: white; color: #e74c3c; border: 2px solid #e74c3c; padding: 12px 20px; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s; width: 100%; }
+    .btn-reset:hover { background: #fff5f5; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="padding: 15px; margin-bottom: 20px; border-radius: 6px; font-weight: bold; text-align: center;
+                    {% if category == 'success' %}background: #e6f6f2; color: #10a37f; border: 1px solid #10a37f;
+                    {% elif category == 'error' %}background: #fee2e2; color: #e74c3c; border: 1px solid #e74c3c;{% endif %}">
+                    {% if category == 'success' %}✅{% else %}⚠️{% endif %} {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="admin-header">
+        <h2><img src="{{ url_for('static', filename='images/edit.svg') }}" style="width: 24px; filter: invert(20%) sepia(85%) saturate(3015%) hue-rotate(264deg) brightness(85%) contrast(106%);"> Modifier : {{ user.username }}</h2>
+        <a href="/admin" style="color: #666; text-decoration: none; font-weight: bold;">← Annuler</a>
+    </div>
+
+    <form method="POST">
+        <div class="form-group">
+            <label>Pseudo du joueur</label>
+            <input type="text" name="username" value="{{ user.username }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Adresse Email</label>
+            <input type="email" name="email" value="{{ user.email }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Expérience Globale (XP)</label>
+            <input type="number" name="global_xp" value="{{ user.global_xp }}" required>
+            <p style="font-size: 0.85rem; color: #888; margin-top: 5px;">Modifie cette valeur pour donner de l'XP bonus ou pénaliser le joueur.</p>
+        </div>
+
+        <button type="submit" class="btn-save"> Enregistrer les modifications</button>
+    </form>
+
+    <div style="margin-top: 40px; padding-top: 25px; border-top: 2px dashed #eee;">
+        <h3 style="margin: 0 0 10px 0; color: #e74c3c; font-size: 1.15rem;">Sécurité du compte</h3>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">
+            Envoie un lien sécurisé permettant à <strong>{{ user.username }}</strong> de choisir un nouveau mot de passe s'il a perdu l'accès à son compte.
+        </p>
+
+        <form action="/admin/utilisateur/reinitialiser-mdp/{{ user.id_utilisateur }}" method="POST">
+            <button type="submit" class="btn-reset">
+                ✉️ Envoyer un email de réinitialisation
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}{% if exercice %}Modifier l'exercice{% else %}Nouvel Exercice{% endif %} - Admin Codexia{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-container { max-width: 900px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 6px solid #e74c3c; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #eee; }
+    .admin-header h2 { margin: 0; color: #310652; }
+    
+    .form-section { background: #f9f9fb; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #eef; }
+    .form-section h3 { margin-top: 0; color: #e74c3c; font-size: 1.1rem; margin-bottom: 15px; }
+    
+    .form-group { margin-bottom: 15px; }
+    .form-row { display: flex; gap: 20px; }
+    .form-row .form-group { flex: 1; }
+    
+    label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; font-size: 0.95rem; }
+    input[type="text"], input[type="number"], select, textarea { 
+        width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 1rem;
+    }
+    textarea { resize: vertical; min-height: 100px; }
+    
+    /* Pour les zones de code (police différente) */
+    .code-area { font-family: 'Courier New', Courier, monospace !important; background: #1e1e1e; color: #d4d4d4; border: none; }
+    
+    .btn-save { background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; width: 100%; }
+    .btn-save:hover { background: #c0392b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h2>{% if exercice %} MODIFIER : {{ exercice.title }}{% else %} Créer un nouvel exercice{% endif %}</h2>
+        <a href="javascript:history.back()" style="color: #666; text-decoration: none; font-weight: bold;">← Retour</a>
+    </div>
+
+    <form method="POST">
+        
+        <div class="form-section">
+            <h3>1. Informations Générales</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Titre de l'exercice</label>
+                    <input type="text" name="title" value="{{ exercice.title if exercice else '' }}" required placeholder="Ex: La boucle infernale">
+                </div>
+                <div class="form-group">
+                    <label>Chemin URL (Slug)</label>
+                    <input type="text" name="chemin_url" value="{{ exercice.chemin_url if exercice else '' }}" required placeholder="Ex: boucle-infernale">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Description courte (Affichée sur la carte du parcours)</label>
+                <input type="text" name="description" value="{{ exercice.description if exercice else '' }}" required placeholder="Ex: Apprends à utiliser la boucle for.">
+            </div>
+
+            <div class="form-group">
+                <label>Consignes détaillées (Affichées dans l'arène de code)</label>
+                <textarea name="instructions" required placeholder="Explique ce que l'élève doit faire...">{{ exercice.instructions if exercice else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>2. Configuration & Difficulté</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Parcours (Langage)</label>
+                    <select name="id_track" required>
+                        <option value="1" {% if exercice and exercice.id_track == 1 %}selected{% endif %}>Python</option>
+                        <option value="2" {% if exercice and exercice.id_track == 2 %}selected{% endif %}>JavaScript</option>
+                        <option value="3" {% if exercice and exercice.id_track == 3 %}selected{% endif %}>SQL</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Difficulté (Grade)</label>
+                    <select name="grade_exercice" required>
+                        <option value="Débutant" {% if exercice and exercice.grade_exercice == 'Débutant' %}selected{% endif %}>Débutant</option>
+                        <option value="Intermédiaire" {% if exercice and exercice.grade_exercice == 'Intermédiaire' %}selected{% endif %}>Intermédiaire</option>
+                        <option value="Avancé" {% if exercice and exercice.grade_exercice == 'Avancé' %}selected{% endif %}>Avancé</option>
+                        <option value="Expert" {% if exercice and exercice.grade_exercice == 'Expert' %}selected{% endif %}>Expert</option>
+                        <option value="Maître" {% if exercice and exercice.grade_exercice == 'Maître' %}selected{% endif %}>Maître</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Récompense XP</label>
+                    <input type="number" name="xp_reward" value="{{ exercice.xp_reward if exercice else '50' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Thème / Chapitre</label>
+                    <input type="text" name="theme_chapitre" value="{{ exercice.theme_chapitre if exercice else '' }}" required placeholder="Ex: Les Variables">
+                </div>
+                <div class="form-group">
+                    <label>Numéro d'ordre (Position)</label>
+                    <input type="number" name="numero_ordre" value="{{ exercice.numero_ordre if exercice else '1' }}" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>3. Le Code</h3>
+            <div class="form-group">
+                <label>Code de base (Fourni à l'élève dans l'éditeur)</label>
+                <textarea name="base_code" class="code-area" rows="6" placeholder="def ma_fonction():\n    pass">{{ exercice.base_code if exercice else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Code de Test (Caché - Utilisé par le moteur de correction)</label>
+                <textarea name="test_code" class="code-area" rows="8" required placeholder="Mets tes assertions (assert) ou ton script SQL complet ici.">{{ exercice.test_code if exercice else '' }}</textarea>
+                <p style="font-size: 0.85rem; color: #888; margin-top: 5px;">Rappel SQL : N'oublie pas le séparateur <strong>---</strong> entre la création des tables et la requête attendue.</p>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-save"> Sauvegarder l'exercice</button>
+    </form>
+</div>
+{% endblock %}

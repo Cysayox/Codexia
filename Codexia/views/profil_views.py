@@ -2,10 +2,10 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from utils import calculer_rang, allowed_file
+from utils import calculer_rang, allowed_file, obtenir_titres_et_badges # ⚠️ NOUVEL IMPORT ICI
 from models.profil_model import (get_user_by_id, get_historique_user, 
                                  update_profil_base, update_password, 
-                                 update_avatar, delete_utilisateur,get_user_stats_by_track)
+                                 update_avatar, delete_utilisateur, get_user_stats_by_track)
 
 # Création du Blueprint pour le profil
 profil_bp = Blueprint('profil', __name__)
@@ -14,7 +14,6 @@ profil_bp = Blueprint('profil', __name__)
 def profil():
     if 'user_id' not in session:
         flash("Tu dois être connecté pour voir ton profil.", "error")
-        # ⚠️ Redirection vers auth
         return redirect(url_for('auth.connexion'))
 
     user_id = session['user_id']
@@ -23,13 +22,30 @@ def profil():
     user_db = get_user_by_id(user_id)
     historique = get_historique_user(user_id)
     
-    # ⚠️ NOUVEAUTÉ : On récupère l'XP de chaque langage ET on passe le nom du langage à la fonction
     stats_tracks = get_user_stats_by_track(user_id)
+    
+    # ⚠️ NOUVEAUTÉ : Initialisation des compteurs d'XP pour les badges
+    python_xp = 0
+    js_xp = 0
+    sql_xp = 0
+    
     for stat in stats_tracks:
         stat['rang_info'] = calculer_rang(stat['xp'], track_name=stat['track_name'])
+        
+        # On intercepte l'XP de chaque langage pour nos médailles
+        track_name_lower = stat['track_name'].lower()
+        if track_name_lower == 'python':
+            python_xp = stat['xp']
+        elif track_name_lower == 'javascript':
+            js_xp = stat['xp']
+        elif track_name_lower == 'sql':
+            sql_xp = stat['xp']
 
-    # ⚠️ NOUVEAUTÉ : On précise 'global' pour le rang général du joueur
+    # On précise 'global' pour le rang général du joueur (avec les 10 nouveaux paliers)
     rang_info = calculer_rang(user_db['global_xp'], track_name='global')
+    
+    # ⚠️ NOUVEAUTÉ : Génération des 10 Titres et des 3 Badges !
+    recompenses = obtenir_titres_et_badges(user_db['global_xp'], python_xp, js_xp, sql_xp)
     
     user_info = {
         "username": user_db['username'],
@@ -41,7 +57,8 @@ def profil():
         "avatar_url": user_db['avatar_url']
     }
 
-    return render_template('profil.html', user=user_info, historique=historique, stats_tracks=stats_tracks)
+    # On ajoute recompenses=recompenses au rendu du template
+    return render_template('profil.html', user=user_info, historique=historique, stats_tracks=stats_tracks, recompenses=recompenses)
 
 
 @profil_bp.route('/profil/modifier', methods=['GET', 'POST'])

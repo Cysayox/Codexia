@@ -3,19 +3,13 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : mar. 24 mars 2026 à 02:00
+-- Généré le : mar. 24 mars 2026 à 18:39
 -- Version du serveur : 9.1.0
 -- Version de PHP : 8.3.14
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Base de données : `codexia`
@@ -183,6 +177,8 @@ INSERT INTO `progresser` (`id_utilisateur`, `id_exercice`, `status_progression`,
 (3, 2, 'termine', '2026-03-21 18:00:41'),
 (5, 1, 'termine', '2026-03-21 22:30:32'),
 (5, 2, 'termine', '2026-03-21 22:34:17'),
+(5, 81, 'termine', '2026-03-24 13:00:45'),
+(5, 83, 'termine', '2026-03-24 12:44:40'),
 (6, 81, 'termine', '2026-03-24 01:54:19');
 
 -- --------------------------------------------------------
@@ -203,7 +199,7 @@ CREATE TABLE IF NOT EXISTS `soumission` (
   PRIMARY KEY (`id_soumission`),
   KEY `fk_utilisateur_soumission` (`id_utilisateur`),
   KEY `fk_exercice_soumission` (`id_exercice`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `soumission`
@@ -234,7 +230,11 @@ INSERT INTO `soumission` (`id_soumission`, `id_utilisateur`, `id_exercice`, `cod
 (22, 2, 55, 'function addition(a, b) {\n    return a+b\n}', 'success', 1, 'EXERCICE_REUSSI'),
 (23, 6, 81, 'SELECT \n-- Ton code ici\nSELECT *;', 'failed', 1, '⚠️ Erreur de syntaxe SQL : near \"SELECT\": syntax error'),
 (24, 6, 81, 'SELECT \n-- Ton code ici\nSELECT * from employes', 'failed', 1, '⚠️ Erreur de syntaxe SQL : near \"SELECT\": syntax error'),
-(25, 6, 81, 'SELECT \n-- Ton code ici\n* from employes;', 'success', 1, '✅ SUCCÈS : Ta requête a renvoyé exactement les bonnes données !');
+(25, 6, 81, 'SELECT \n-- Ton code ici\n* from employes;', 'success', 1, '✅ SUCCÈS : Ta requête a renvoyé exactement les bonnes données !'),
+(26, 5, 83, 'SELECT * \nFROM employes\nWHERE departement = \"IT\";', 'success', 1, '✅ SUCCÈS : Ta requête a renvoyé exactement les bonnes données !'),
+(27, 5, 81, 'SELECT id from employes;\n', 'failed', 1, '❌ ÉCHEC : Les données renvoyées sont incorrectes.\n\nAttendu :\n[(1, \'Alice\'), (2, \'Bob\')]\n\nObtenu avec ta requête :\n[(1,), (2,)]'),
+(28, 5, 81, 'SELECT id,name from employes;\n', 'failed', 1, '⚠️ Erreur de syntaxe SQL : no such column: name'),
+(29, 5, 81, 'SELECT id,nom from employes;\n', 'success', 1, '✅ SUCCÈS : Ta requête a renvoyé exactement les bonnes données !');
 
 -- --------------------------------------------------------
 
@@ -308,7 +308,7 @@ INSERT INTO `utilisateur` (`id_utilisateur`, `username`, `email`, `password_hash
 (1, 'AdminTest', 'admin@test.com', 'motdepassebidon', NULL, NULL, '2026-03-11 17:50:40', 'student', 1, 100),
 (2, 'Samira_V972', 'samirav@gmail.com', 'scrypt:32768:8:1$ZKenUiu5zOkop3sl$b912cb903e5ce473dada01f763cdf6ea37f76626307e1f9a6435c808e9c0e5588ee7ce15d331dee3acfa6633e2bf8c670ef646158e9407e6fd4f95e434815f84', NULL, 'uploads/avatars/user_2_BEYONCE.jpg', '2026-03-11 18:37:42', 'student', 1, 450),
 (3, 'admin', 'admin@admin.com', 'scrypt:32768:8:1$bTbiqx14gPKFUhHP$00376eaa458be019e36af408e9f7fafb9c67441ff90dff96e38da69584352ccfbfaeeba4507e15f2c7a007930b506c46f82af046b1951507865dc0f23a0511e6', NULL, NULL, '2026-03-15 22:56:47', 'admin', 1, 200),
-(5, 'Aude', 'Aude@gmail.com', 'scrypt:32768:8:1$NaUZGuowlMGxccbG$dd200a69ad5337ec09736eb46a7890ef4c7c3ee6f4a9614128921d574efde0443c951280dc82f828e5ab8c4a3cd2b295c80fc0b51475a28d8c15bff9637a719b', NULL, NULL, '2026-03-21 22:29:41', 'student', 1, 200),
+(5, 'Aude', 'Aude@gmail.com', 'scrypt:32768:8:1$NaUZGuowlMGxccbG$dd200a69ad5337ec09736eb46a7890ef4c7c3ee6f4a9614128921d574efde0443c951280dc82f828e5ab8c4a3cd2b295c80fc0b51475a28d8c15bff9637a719b', NULL, NULL, '2026-03-21 22:29:41', 'student', 1, 400),
 (6, 'RobotMan', 'robot-man@gmail.com', 'scrypt:32768:8:1$QuU1bZUh8qP85vtK$6427c2b7d81c0d5585dde7c6a515a96c0c77f09539f81df83c7ecf89fba1a56d9a4782677290e645514524c50317f5d06ad468f1d7149a4bef302dc76c6a3e29', NULL, NULL, '2026-03-23 16:30:54', 'student', 1, 3000);
 
 --
@@ -342,7 +342,3 @@ ALTER TABLE `suivre`
   ADD CONSTRAINT `fk_track_suivre` FOREIGN KEY (`id_track`) REFERENCES `track` (`id_track`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_utilisateur_suivre` FOREIGN KEY (`id_utilisateur`) REFERENCES `utilisateur` (`id_utilisateur`) ON DELETE CASCADE;
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
