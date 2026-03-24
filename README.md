@@ -9,6 +9,7 @@
 - bouton quitter exercice qui ramène sur la page précédente (si possible ouvrir la liste déroulante et descendre jusqu'à l'exercice où l'on était) (urgent2)
 
 ## Fait:
-- Classement général
+- Classement général ✅
 - Parcours Javascript ✅
 - Parcours SQL ✅
+- Panel Administrateur ✅
