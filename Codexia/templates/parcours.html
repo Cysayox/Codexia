@@ -76,7 +76,24 @@
         </div>
 
         <aside class="progress-sidebar">
-            <h3>Progression Globale</h3>
+            
+            {% if user %}
+            {% set max_xp = 5000 if track_name|lower == 'python' else 8150 %}
+            
+            <div style="background: #f9f9fb; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #eef;">
+                <h3 style="margin-top: 0; font-size: 1rem; color: #555; border-bottom: none; padding-bottom: 0;">Maîtrise en {{ track_name }}</h3>
+                <div style="font-size: 1.3rem; font-weight: bold; color: #6a0dad; margin-bottom: 5px;">{{ user.titre_rang }}</div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #888;">
+                    <span>XP du Parcours :</span>
+                    <span style="font-weight: bold; color: #333;">{{ user.track_xp }} / {{ max_xp }}</span>
+                </div>
+                <div style="width: 100%; height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+                    <div style="height: 100%; background: #10a37f; width: {{ (user.track_xp / max_xp) * 100 }}%; max-width: 100%;"></div>
+                </div>
+            </div>
+            {% endif %}
+
+            <h3>Aperçu du Parcours</h3>
             <div class="nodes-container">
                 {% for exo in exercices %}
                     <a href="{% if not session.get('user_id') %}/connexion{% elif exo.statut_visuel != 'locked' %}/exercice/{{ exo.chemin_url }}{% else %}#{% endif %}" style="text-decoration: none;">
@@ -87,7 +104,7 @@
                 {% endfor %}
             </div>
 
-            <div class="progress-legend">
+            <div class="progress-legend" style="margin-top: 20px;">
                 <div class="legend-item"><div class="legend-circle node-completed"></div> <span>Terminé</span></div>
                 <div class="legend-item"><div class="legend-circle node-in_progress"></div> <span>En cours</span></div>
                 <div class="legend-item"><div class="legend-circle node-available"></div> <span>Disponible</span></div>
