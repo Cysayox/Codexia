@@ -25,16 +25,18 @@
     <div class="instructions">
         <h2>{{ exercice.title }} <span style="font-size: 0.6em; color: #6a0dad;">({{ exercice.grade_exercice }})</span></h2>
         
+        <h3>Consignes</h3>
+        <p style="font-size: 1.05em; font-weight: 500; color: #222;">
+            {{ exercice.instructions | default('Écris ton code pour résoudre ce problème.', true) | safe }}
+        </p>
+        
         {% if exercice.description %}
-            <div style="margin-bottom: 20px; line-height: 1.5; color: #333;">
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; line-height: 1.5; color: #333;">
                 {{ exercice.description | safe }}
             </div>
         {% endif %}
-
-        <h3>Consignes</h3>
-        <p>{{ exercice.instructions | default('Écris ton code pour résoudre ce problème.', true) | safe }}</p>
         
-        <hr>
+        <hr style="margin-top: 30px;">
         <p><strong>💎 Récompense :</strong> {{ exercice.xp_reward }} XP</p>
         
         <a href="/" style="display: inline-block; margin-top: 20px; color: #6a0dad; text-decoration: none; font-weight: bold;">← Quitter l'exercice</a>
