@@ -21,19 +21,19 @@
         </div>
         
         <h2 class="profil-username">{{ user.username }}</h2>
-        <div class="profil-rank">👑 {{ user.titre_rang }}</div>
+        <div class="profil-rank">👑 {{ user.titre_rang }} Général</div>
         <div class="profil-date">Membre depuis le {{ user.date_inscription }}</div>
         
         <div class="xp-container">
             <div class="xp-header">
-                <span>Expérience Totale</span>
+                <span>Expérience Globale</span>
                 <span style="color: #10a37f;">💎 {{ user.xp }} XP</span>
             </div>
             <div class="xp-bar-bg">
-                <div class="xp-bar-fill" style="width: {{ (user.xp / 4200) * 100 }}%; max-width: 100%;"></div>
+                <div class="xp-bar-fill" style="width: {{ (user.xp / 21300) * 100 }}%; max-width: 100%;"></div>
             </div>
             <div style="text-align: center; font-size: 0.8rem; color: #888; margin-top: 8px;">
-                Progression vers le rang Maître
+                Progression totale sur Codexia
             </div>
         </div>
 
@@ -54,7 +54,7 @@
             <form action="/profil/supprimer" method="POST" style="display: flex; gap: 10px;">
                 <input type="text" name="confirm_username" required placeholder="Tape ton pseudo..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
                 <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">
-                    Confirmer la suppression
+                    Confirmer
                 </button>
             </form>
         </div>
@@ -74,47 +74,35 @@
         </section>
 
         <section class="details-section">
-            <h3>Progression par Parcours</h3>
+            <h3>Progression par Langage</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-top: 0;">Ton niveau de maîtrise spécifique pour chaque technologie.</p>
             
-            <div class="track-progress">
-                <div class="track-header">
-                    <div class="track-title-container">
-                        <img src="{{ url_for('static', filename='images/python.svg') }}" alt="Python Logo" class="track-icon-mini">
-                        <span>Python</span>
+            {% if stats_tracks %}
+                {% for stat in stats_tracks %}
+                {% set max_xp = 5000 if stat.track_name|lower == 'python' else 8150 %}
+                
+                <div class="track-progress" style="margin-bottom: 20px;">
+                    <div class="track-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div class="track-title-container" style="display: flex; align-items: center; gap: 10px;">
+                            <img src="{{ url_for('static', filename='images/' ~ stat.track_name|lower ~ '.svg') }}" alt="{{ stat.track_name }} Logo" class="track-icon-mini" style="width: 24px;">
+                            <span style="font-weight: bold;">{{ stat.track_name }}</span>
+                            <span style="font-size: 0.85rem; padding: 2px 8px; background: #f0f0f5; border-radius: 12px; color: #555;">{{ stat.rang_info.titre }}</span>
+                        </div>
+                        <span style="color: #10a37f; font-weight: bold; font-size: 0.9rem;">{{ stat.xp }} / {{ max_xp }} XP</span>
                     </div>
-                    <span style="color: #10a37f;">{{ ((user.xp / 4200) * 100)|round(1) }}%</span>
-                </div>
-                <div class="xp-bar-bg">
-                    <div class="xp-bar-fill track-python" style="width: {{ (user.xp / 4200) * 100 }}%;"></div>
-                </div>
-            </div>
-
-            <div class="track-progress">
-                <div class="track-header">
-                    <div class="track-title-container">
-                        <img src="{{ url_for('static', filename='images/javascript.svg') }}" alt="JavaScript Logo" class="track-icon-mini">
-                        <span>JavaScript</span>
+                    <div class="xp-bar-bg" style="background-color: #eee; width: 100%; height: 8px; border-radius: 4px; overflow: hidden;">
+                        {% set bar_color = '#10a37f' %}
+                        {% if stat.track_name|lower == 'python' %}{% set bar_color = '#3776ab' %}{% endif %}
+                        {% if stat.track_name|lower == 'javascript' %}{% set bar_color = '#f7df1e' %}{% endif %}
+                        {% if stat.track_name|lower == 'sql' %}{% set bar_color = '#336791' %}{% endif %}
+                        
+                        <div class="xp-bar-fill" style="width: {{ (stat.xp / max_xp) * 100 }}%; max-width: 100%; background-color: {{ bar_color }}; height: 100%; transition: width 0.5s;"></div>
                     </div>
-                    <span style="color: #aaa;">0% (À venir)</span>
                 </div>
-                <div class="xp-bar-bg" style="background-color: #eee;">
-                    <div class="xp-bar-fill track-js" style="width: 0%;"></div>
-                </div>
-            </div>
-
-            <div class="track-progress">
-                <div class="track-header">
-                    <div class="track-title-container">
-                        <img src="{{ url_for('static', filename='images/sql.svg') }}" alt="SQL Logo" class="track-icon-mini">
-                        <span>SQL</span>
-                    </div>
-                    <span style="color: #aaa;">0% (À venir)</span>
-                </div>
-                <div class="xp-bar-bg" style="background-color: #eee;">
-                    <div class="xp-bar-fill track-sql" style="width: 0%;"></div>
-                </div>
-            </div>
-            
+                {% endfor %}
+            {% else %}
+                <p style="color: #888; font-style: italic;">Tu n'as pas encore commencé d'entraînement.</p>
+            {% endif %}
         </section>
 
         <section class="details-section">
