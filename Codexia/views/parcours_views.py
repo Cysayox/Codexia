@@ -5,7 +5,7 @@ from moteur_codexia import evaluer_code
 from models.parcours_model import (get_track_by_slug, get_exercices_by_track, 
                                    get_user_progress, get_exercice_by_slug, 
                                    get_exercice_for_validation, enregistrer_soumission, 
-                                   valider_exercice_et_donner_xp)
+                                   valider_exercice_et_donner_xp, get_user_track_xp)
 from models.profil_model import get_user_by_id
 
 parcours_bp = Blueprint('parcours', __name__)
@@ -25,12 +25,19 @@ def parcours(slug):
     if 'user_id' in session:
         db_user = get_user_by_id(session['user_id'])
         if db_user:
-            rang = calculer_rang(db_user['global_xp'])
+            # ⚠️ NOUVEAUTÉ : On calcule le rang spécifiquement pour CE parcours en lui passant le nom du langage
+            track_xp = get_user_track_xp(session['user_id'], track['id_track'])
+            track_rang = calculer_rang(track_xp, track_name=track['name'])
+            
+            # (Optionnel mais propre) On calcule le rang global au cas où tu en aurais besoin dans ta barre de navigation
+            rang_global = calculer_rang(db_user['global_xp'], track_name='global')
+            
             user_info = {
                 "username": db_user['username'],
-                "xp": db_user['global_xp'],
-                "titre_rang": rang["titre"],
-                "niveau_actuel": rang["niveau"],
+                "global_xp": db_user['global_xp'], # Toujours là au cas où
+                "track_xp": track_xp,              # L'XP spécifique
+                "titre_rang": track_rang["titre"], # Le rang sur CE langage
+                "niveau_actuel": track_rang["niveau"], # Le niveau numérique pour débloquer
                 "role": db_user['role']
             }
             user_progress = get_user_progress(session['user_id'])
@@ -52,6 +59,7 @@ def parcours(slug):
                 exo['statut_visuel'] = 'available'
 
     return render_template('parcours.html', exercices=liste_exercices, user=user_info, track_name=track['name'])
+
 
 @parcours_bp.route('/exercice/<chemin_url>')
 def afficher_exercice(chemin_url):
