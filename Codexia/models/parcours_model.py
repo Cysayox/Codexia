@@ -91,3 +91,18 @@ def valider_exercice_et_donner_xp(id_utilisateur, id_exercice, xp_reward):
         
     cursor.close()
     conn.close()
+
+def get_user_track_xp(user_id, track_id):
+    """Calcule l'XP d'un utilisateur pour un parcours spécifique."""
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('''
+        SELECT COALESCE(SUM(e.xp_reward), 0) as track_xp
+        FROM progresser p
+        JOIN exercice e ON p.id_exercice = e.id_exercice
+        WHERE p.id_utilisateur = %s AND e.id_track = %s AND p.status_progression = 'termine'
+    ''', (user_id, track_id))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return int(result['track_xp'])
