@@ -1,8 +1,7 @@
 # Codexia
 
 ## A faire:
-- Parcours Javascript ✅
-- Parcours SQL ✅
+
 - Page explication systeme niveau
 - créé la logique Python pour trouver le "dernier parcours joué"
 - Correction quand on a fini l'exercice (qui est la même pour tous les utilisateurs) (urgent)
@@ -11,3 +10,5 @@
 
 ## Fait:
 - Classement général
+- Parcours Javascript ✅
+- Parcours SQL ✅
