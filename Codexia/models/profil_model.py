@@ -72,3 +72,27 @@ def delete_utilisateur(user_id):
     conn.commit()
     cursor.close()
     conn.close()
+
+def get_user_stats_by_track(user_id):
+    """Récupère l'XP accumulée pour CHAQUE parcours actif."""
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    # NOUVELLE REQUÊTE CORRIGÉE
+    cursor.execute('''
+        SELECT t.name as track_name, COALESCE(user_xp.total_xp, 0) as xp
+        FROM track t
+        LEFT JOIN (
+            SELECT e.id_track, SUM(e.xp_reward) as total_xp
+            FROM progresser p
+            JOIN exercice e ON p.id_exercice = e.id_exercice
+            WHERE p.id_utilisateur = %s AND p.status_progression = 'termine'
+            GROUP BY e.id_track
+        ) user_xp ON t.id_track = user_xp.id_track
+        WHERE t.is_active = 1
+    ''', (user_id,))
+    
+    stats = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return stats
