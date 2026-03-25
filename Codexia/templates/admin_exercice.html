@@ -114,6 +114,22 @@
                 <p style="font-size: 0.85rem; color: #888; margin-top: 5px;">Rappel SQL : N'oublie pas le séparateur <strong>---</strong> entre la création des tables et la requête attendue.</p>
             </div>
         </div>
+        <div class="form-section">
+            <h3 style="color: #10a37f;">4. Correction Officielle (Optionnelle)</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-top: -5px; margin-bottom: 15px;">
+                Cette solution s'affichera uniquement lorsque l'utilisateur aura réussi l'exercice.
+            </p>
+            
+            <div class="form-group">
+                <label>Code de la solution (La bonne réponse)</label>
+                <textarea name="code_solution" class="code-area" rows="6" placeholder="def ma_fonction():\n    return 'Solution parfaite'">{{ exercice.code_solution if exercice else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Explications / Astuces</label>
+                <textarea name="explication" rows="4" placeholder="Explique pourquoi cette solution est la meilleure, ou donne une astuce de syntaxe...">{{ exercice.explication if exercice else '' }}</textarea>
+            </div>
+        </div>
 
         <button type="submit" class="btn-save"> Sauvegarder l'exercice</button>
     </form>

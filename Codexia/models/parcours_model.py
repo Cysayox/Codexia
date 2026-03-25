@@ -35,10 +35,16 @@ def get_user_progress(user_id):
 
 # ⚠️ LA FONCTION QUI MANQUAIT EST ICI ⚠️
 def get_exercice_by_slug(slug):
-    """Récupère toutes les infos d'un exercice selon son URL."""
+    """Récupère toutes les infos d'un exercice, son parcours, et sa correction s'il y en a une."""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM exercice WHERE chemin_url = %s", (slug,))
+    cursor.execute("""
+        SELECT e.*, t.chemin_url AS track_slug, c.code_solution, c.explication
+        FROM exercice e 
+        JOIN track t ON e.id_track = t.id_track 
+        LEFT JOIN correction c ON e.id_exercice = c.id_exercice
+        WHERE e.chemin_url = %s
+    """, (slug,))
     exercice = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -106,3 +112,16 @@ def get_user_track_xp(user_id, track_id):
     cursor.close()
     conn.close()
     return int(result['track_xp'])
+
+def get_next_exercice(id_track, numero_ordre):
+    """Récupère l'exercice suivant dans le même parcours."""
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT chemin_url FROM exercice 
+        WHERE id_track = %s AND numero_ordre = %s
+    """, (id_track, numero_ordre + 1))
+    next_exo = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return next_exo

@@ -48,6 +48,26 @@
             <a href="/exercice/{{ next_exo.chemin_url }}" id="btn-next" style="display: none; background: #6a0dad; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; transition: 0.3s;">Exercice suivant →</a>
             {% endif %}
         </div>
+        <div id="correction-panel" style="display: {% if est_termine %}block{% else %}none{% endif %}; margin-top: 40px; padding: 20px; background: #f0fdf4; border: 2px solid #10a37f; border-radius: 8px;">
+            <h3 style="color: #10a37f; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                💡 Solution Officielle
+            </h3>
+            
+            {% if exercice.code_solution %}
+            <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: monospace; border: 1px solid #333;"><code>{{ exercice.code_solution | safe }}</code></pre>
+            {% endif %}
+            
+            {% if exercice.explication %}
+            <div style="margin-top: 15px; color: #2c3e50; line-height: 1.6; font-size: 0.95rem;">
+                <strong>Explication :</strong><br>
+                {{ exercice.explication | safe }}
+            </div>
+            {% endif %}
+            
+            {% if not exercice.code_solution and not exercice.explication %}
+            <p style="color: #666; font-style: italic; margin-bottom: 0;">La correction détaillée sera bientôt ajoutée par l'administrateur.</p>
+            {% endif %}
+        </div>
     </div>
     
     <div class="workspace">
@@ -119,6 +139,14 @@
                 const btnNext = document.getElementById('btn-next');
                 if (btnNext) {
                     btnNext.style.display = 'inline-block';
+                }
+                // ⚠️ NOUVEAUTÉ : On affiche la correction avec un scroll doux
+                const correctionPanel = document.getElementById('correction-panel');
+                if (correctionPanel) {
+                    correctionPanel.style.display = 'block';
+                    setTimeout(() => {
+                        correctionPanel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    }, 500);
                 }
             } else {
                 consoleOutput.style.color = '#ff4444';
