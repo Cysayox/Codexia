@@ -14,23 +14,24 @@
         input:checked + .slider:before { transform: translateX(22px); }
         
         /* Effet visuel sur les exercices quand le mode édition est ACTIF */
-        .challenge-card.edit-mode-active {
-            border: 2px dashed #e74c3c !important;
-            background-color: #fffafa !important;
-        }
-        .challenge-card.edit-mode-active:hover {
-            box-shadow: 0 4px 12px rgba(231,76,60,0.2) !important;
-            border-color: #c0392b !important;
-        }
+        .challenge-card.edit-mode-active { border: 2px dashed #e74c3c !important; background-color: #fffafa !important; }
+        .challenge-card.edit-mode-active:hover { box-shadow: 0 4px 12px rgba(231,76,60,0.2) !important; border-color: #c0392b !important; }
 
-        /* --- STYLE DES MENUS DÉROULANTS (ACCORDÉONS) --- */
-        .niveau-section { margin-bottom: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; }
-        .niveau-summary { padding: 15px 20px; font-size: 1.1rem; font-weight: bold; background: #f9f9fb; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; transition: 0.2s; }
+        /* --- STYLE DES MENUS DÉROULANTS (ACCORDÉONS FLUIDES) --- */
+        .niveau-section { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; width: 100%; overflow: hidden; }
+        
+        .niveau-summary { padding: 15px 20px; font-size: 1.1rem; font-weight: bold; background: #f9f9fb; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; user-select: none; }
         .niveau-summary:hover { background: #f0f0f5; }
-        .niveau-summary::-webkit-details-marker { display: none; } /* Cache la petite flèche moche par défaut */
-        .niveau-summary::after { content: '▼'; font-size: 0.9rem; color: #6a0dad; transition: transform 0.3s; }
-        details[open] .niveau-summary::after { transform: rotate(180deg); }
-        .niveau-content { padding: 20px; }
+        
+        .chevron { font-size: 0.9rem; color: #6a0dad; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .niveau-section.is-open .chevron { transform: rotate(180deg); }
+        .niveau-section.is-open .niveau-summary { border-bottom: 1px solid #eee; }
+        
+        /* Magie CSS pour une animation fluide de la hauteur (0 à auto) */
+        .niveau-content-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .niveau-section.is-open .niveau-content-wrapper { grid-template-rows: 1fr; }
+        .niveau-content { overflow: hidden; }
+        .niveau-content-inner { padding: 20px; }
         
         /* Animation de surbrillance quand on revient d'un exercice */
         @keyframes highlightExo { 
@@ -79,79 +80,87 @@
     <div class="layout-main-sidebar">
         <div class="main-content-grid">
             
-            {% if exercices_groupes %}
-                {% for niveau, exos in exercices_groupes.items() %}
+            <div style="display: flex; flex-direction: column; width: 100%; gap: 15px;">
                 
-                <details class="niveau-section" {% if loop.first %}open{% endif %}>
-                    <summary class="niveau-summary">
-                        <span>🏆 Niveau {{ niveau }} <span style="font-weight: normal; color: #888; font-size: 0.9rem;">({{ exos|length }} défis)</span></span>
-                    </summary>
+                {% if exercices_groupes %}
+                    {% for niveau, exos in exercices_groupes.items() %}
                     
-                    <div class="niveau-content">
-                        <div class="challenges-grid">
-                            {% for exo in exos %}
-                                
-                                {% set niveau_class = 'debutant' %}
-                                {% if exo.grade_exercice == 'Intermédiaire' %} {% set niveau_class = 'intermediaire' %}
-                                {% elif exo.grade_exercice == 'Avancé' %} {% set niveau_class = 'avance' %}
-                                {% elif exo.grade_exercice == 'Expert' %} {% set niveau_class = 'expert' %}
-                                {% elif exo.grade_exercice == 'Maître' %} {% set niveau_class = 'maitre' %}
-                                {% endif %}
+                    <div class="niveau-section {% if loop.first %}is-open{% endif %}">
+                        <div class="niveau-summary" onclick="toggleNiveau(this)">
+                            <span>🏆 Niveau {{ niveau }} <span style="font-weight: normal; color: #888; font-size: 0.9rem;">({{ exos|length }} défis)</span></span>
+                            <span class="chevron">▼</span>
+                        </div>
+                        
+                        <div class="niveau-content-wrapper">
+                            <div class="niveau-content">
+                                <div class="niveau-content-inner">
+                                    <div class="challenges-grid">
+                                        {% for exo in exos %}
+                                            
+                                            {% set niveau_class = 'debutant' %}
+                                            {% if exo.grade_exercice == 'Intermédiaire' %} {% set niveau_class = 'intermediaire' %}
+                                            {% elif exo.grade_exercice == 'Avancé' %} {% set niveau_class = 'avance' %}
+                                            {% elif exo.grade_exercice == 'Expert' %} {% set niveau_class = 'expert' %}
+                                            {% elif exo.grade_exercice == 'Maître' %} {% set niveau_class = 'maitre' %}
+                                            {% endif %}
 
-                                {% set play_url = '#' %}
-                                {% if not session.get('user_id') %}
-                                    {% set play_url = '/connexion' %}
-                                {% elif exo.statut_visuel != 'locked' or (current_user and current_user.role == 'admin') %}
-                                    {% set play_url = '/exercice/' ~ exo.chemin_url %}
-                                {% endif %}
-                                
-                                {% set edit_url = '/admin/exercice/modifier/' ~ exo.chemin_url %}
+                                            {% set play_url = '#' %}
+                                            {% if not session.get('user_id') %}
+                                                {% set play_url = '/connexion' %}
+                                            {% elif exo.statut_visuel != 'locked' or (current_user and current_user.role == 'admin') %}
+                                                {% set play_url = '/exercice/' ~ exo.chemin_url %}
+                                            {% endif %}
+                                            
+                                            {% set edit_url = '/admin/exercice/modifier/' ~ exo.chemin_url %}
 
-                                <a href="{{ play_url }}" id="exo-{{ exo.chemin_url }}" class="challenge-card niveau-{{ niveau_class }} {% if exo.statut_visuel == 'locked' and session.get('user_id') and user.role != 'admin' %}locked{% endif %}" 
-                                   data-play-url="{{ play_url }}" data-edit-url="{{ edit_url }}">
-                                    
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                        <h3 style="margin: 0; font-size: 1.05rem; color: #333; line-height: 1.2;">
-                                            {% if not session.get('user_id') %}🎯
-                                            {% elif exo.statut_visuel == 'locked' and user.role != 'admin' %}🔒
-                                            {% elif exo.statut_visuel == 'completed' %}✅
-                                            {% else %}🎯{% endif %} 
-                                            {{ exo.title }}
-                                        </h3>
-                                        <span style="font-weight: bold; color: #6a0dad; font-size: 0.85rem; white-space: nowrap; margin-left: 8px;">
-                                            💎 +{{ exo.xp_reward }}
-                                        </span>
+                                            <a href="{{ play_url }}" id="exo-{{ exo.chemin_url }}" class="challenge-card niveau-{{ niveau_class }} {% if exo.statut_visuel == 'locked' and session.get('user_id') and user.role != 'admin' %}locked{% endif %}" 
+                                               data-play-url="{{ play_url }}" data-edit-url="{{ edit_url }}">
+                                                
+                                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                    <h3 style="margin: 0; font-size: 1.05rem; color: #333; line-height: 1.2;">
+                                                        {% if not session.get('user_id') %}🎯
+                                                        {% elif exo.statut_visuel == 'locked' and user.role != 'admin' %}🔒
+                                                        {% elif exo.statut_visuel == 'completed' %}✅
+                                                        {% else %}🎯{% endif %} 
+                                                        {{ exo.title }}
+                                                    </h3>
+                                                    <span style="font-weight: bold; color: #6a0dad; font-size: 0.85rem; white-space: nowrap; margin-left: 8px;">
+                                                        💎 +{{ exo.xp_reward }}
+                                                    </span>
+                                                </div>
+                                                
+                                                <p class="challenge-desc">
+                                                    {% if exo.description %}
+                                                        {{ (exo.description | striptags).split('.')[0] }}.
+                                                    {% else %}
+                                                        Résous ce défi pour gagner de l'XP.
+                                                    {% endif %}
+                                                </p>
+                                                
+                                                <div class="tags-container">
+                                                    <span class="tag tag-{{ niveau_class }}">{{ exo.grade_exercice }}</span>
+                                                    <span class="tag tag-theme">{{ exo.theme_chapitre }}</span>
+                                                    
+                                                    {% if exo.statut_visuel == 'completed' %}
+                                                        <span class="tag" style="background: #e6f6f2; color: #10a37f; border: 1px solid #10a37f;">Terminé</span>
+                                                    {% elif exo.statut_visuel == 'locked' and session.get('user_id') and user.role != 'admin' %}
+                                                        <span class="tag" style="background: #eee; color: #888;">Verrouillé</span>
+                                                    {% endif %}
+                                                </div>
+                                            </a>
+
+                                        {% endfor %}
                                     </div>
-                                    
-                                    <p class="challenge-desc">
-                                        {% if exo.description %}
-                                            {{ (exo.description | striptags).split('.')[0] }}.
-                                        {% else %}
-                                            Résous ce défi pour gagner de l'XP.
-                                        {% endif %}
-                                    </p>
-                                    
-                                    <div class="tags-container">
-                                        <span class="tag tag-{{ niveau_class }}">{{ exo.grade_exercice }}</span>
-                                        <span class="tag tag-theme">{{ exo.theme_chapitre }}</span>
-                                        
-                                        {% if exo.statut_visuel == 'completed' %}
-                                            <span class="tag" style="background: #e6f6f2; color: #10a37f; border: 1px solid #10a37f;">Terminé</span>
-                                        {% elif exo.statut_visuel == 'locked' and session.get('user_id') and user.role != 'admin' %}
-                                            <span class="tag" style="background: #eee; color: #888;">Verrouillé</span>
-                                        {% endif %}
-                                    </div>
-                                </a>
-
-                            {% endfor %}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </details>
-                {% endfor %}
-            {% else %}
-                <p>Aucun défi disponible.</p>
-            {% endif %}
-        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Aucun défi disponible.</p>
+                {% endif %}
+                
+            </div> </div>
 
         <aside class="progress-sidebar">
             
@@ -193,16 +202,21 @@
 </div>
 
 <script>
+    // --- FONCTION POUR OUVRIR/FERMER LES ACCORDÉONS EN DOUCEUR ---
+    function toggleNiveau(element) {
+        const section = element.closest('.niveau-section');
+        section.classList.toggle('is-open');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         
-        // --- 1. SCRIPT DU MODE EDITION ADMIN ---
+        // --- SCRIPT DU MODE EDITION ADMIN ---
         const editToggle = document.getElementById('edit-mode-toggle');
         const challengeCards = document.querySelectorAll('.challenge-card');
 
         if (editToggle) {
             editToggle.addEventListener('change', function() {
                 const isEditMode = this.checked;
-                
                 challengeCards.forEach(card => {
                     if (isEditMode) {
                         card.href = card.getAttribute('data-edit-url');
@@ -215,27 +229,22 @@
             });
         }
 
-        // --- 2. SCRIPT DE RETOUR INTELLIGENT (SCROLL ET OUVERTURE DU MENU) ---
+        // --- SCRIPT DE RETOUR INTELLIGENT (SCROLL ET OUVERTURE DU MENU) ---
         if (window.location.hash) {
-            // On cherche l'exercice correspondant à l'ancre dans l'URL (ex: #exo-sql-select-all)
             const targetExo = document.querySelector(window.location.hash);
-            
             if (targetExo) {
-                // On trouve le menu déroulant parent et on l'ouvre
-                const parentDetails = targetExo.closest('details');
-                if (parentDetails) {
-                    parentDetails.open = true;
+                // On trouve le menu parent et on l'ouvre
+                const parentSection = targetExo.closest('.niveau-section');
+                if (parentSection) {
+                    parentSection.classList.add('is-open');
                 }
                 
-                // On attend un petit peu que le menu s'ouvre, puis on fait défiler l'écran
+                // On laisse un peu plus de temps à l'animation CSS pour s'ouvrir avant de scroller (300ms)
                 setTimeout(() => {
-                    // -100px pour éviter que la carte se cache sous la barre de menu en haut
                     const y = targetExo.getBoundingClientRect().top + window.scrollY - 100; 
                     window.scrollTo({ top: y, behavior: 'smooth' });
-                    
-                    // On fait clignoter la carte !
                     targetExo.classList.add('target-highlight');
-                }, 150);
+                }, 300);
             }
         }
     });
